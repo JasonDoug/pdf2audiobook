@@ -66,10 +66,13 @@ class AWSPollyTTS(TTSProvider):
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
 
+    import html
+
     def text_to_audio(self, text: str, voice_id: str, speed: float) -> bytes:
         # Polly uses SSML for speed control
         rate = f"{int(speed * 100)}%"
-        ssml_text = f'<speak><prosody rate="{rate}">{text}</prosody></speak>'
+        escaped_text = html.escape(text)
+        ssml_text = f'<speak><prosody rate="{rate}">{escaped_text}</prosody></speak>'
         response = self.client.synthesize_speech(
             Text=ssml_text,
             OutputFormat="mp3",
@@ -86,6 +89,8 @@ class AzureTTS(TTSProvider):
             region=os.getenv("AZURE_SPEECH_REGION"),
         )
 
+    import html
+
     def text_to_audio(self, text: str, voice_id: str, speed: float) -> bytes:
         self.speech_config.speech_synthesis_voice_name = voice_id or "en-US-JennyNeural"
         synthesizer = SpeechSynthesizer(
@@ -93,7 +98,8 @@ class AzureTTS(TTSProvider):
         )
         # Azure uses SSML for speed control
         rate = f"{speed:.2f}"
-        ssml_text = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US"><voice name="{self.speech_config.speech_synthesis_voice_name}"><prosody rate="{rate}">{text}</prosody></voice></speak>'
+        escaped_text = html.escape(text)
+        ssml_text = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US"><voice name="{self.speech_config.speech_synthesis_voice_name}"><prosody rate="{rate}">{escaped_text}</prosody></voice></speak>'
         result = synthesizer.speak_ssml_async(ssml_text).get()
         if result.reason == ResultReason.SynthesizingAudioCompleted:
             return result.audio_data
