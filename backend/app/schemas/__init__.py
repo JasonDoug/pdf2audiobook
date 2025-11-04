@@ -3,10 +3,12 @@ from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
+
 class SubscriptionTier(str, Enum):
     FREE = "free"
     PRO = "pro"
     ENTERPRISE = "enterprise"
+
 
 class JobStatus(str, Enum):
     PENDING = "pending"
@@ -14,9 +16,19 @@ class JobStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class ProductType(str, Enum):
     SUBSCRIPTION = "subscription"
     ONE_TIME = "one_time"
+
+
+class VoiceProvider(str, Enum):
+    OPENAI = "openai"
+    GOOGLE = "google"
+    AWS_POLLY = "aws_polly"
+    AZURE = "azure"
+    ELEVEN_LABS = "eleven_labs"
+
 
 # User schemas
 class UserBase(BaseModel):
@@ -24,12 +36,15 @@ class UserBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
 
+
 class UserCreate(UserBase):
     auth_provider_id: str
+
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+
 
 class User(UserBase):
     id: int
@@ -44,20 +59,25 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+
 # Job schemas
 class JobBase(BaseModel):
     original_filename: str
+    voice_provider: VoiceProvider = VoiceProvider.OPENAI
     voice_type: str = "default"
     reading_speed: float = 1.0
     include_summary: bool = False
 
+
 class JobCreate(JobBase):
     pass
+
 
 class JobUpdate(BaseModel):
     status: Optional[JobStatus] = None
     progress_percentage: Optional[int] = None
     error_message: Optional[str] = None
+
 
 class Job(JobBase):
     id: int
@@ -76,6 +96,7 @@ class Job(JobBase):
     class Config:
         from_attributes = True
 
+
 # Product schemas
 class ProductBase(BaseModel):
     name: str
@@ -86,8 +107,10 @@ class ProductBase(BaseModel):
     credits_included: Optional[int] = None
     subscription_tier: Optional[SubscriptionTier] = None
 
+
 class ProductCreate(ProductBase):
     paddle_product_id: str
+
 
 class Product(ProductBase):
     id: int
@@ -99,14 +122,17 @@ class Product(ProductBase):
     class Config:
         from_attributes = True
 
+
 # Subscription schemas
 class SubscriptionBase(BaseModel):
     status: str = "active"
+
 
 class SubscriptionCreate(SubscriptionBase):
     user_id: int
     product_id: int
     paddle_subscription_id: Optional[str] = None
+
 
 class Subscription(SubscriptionBase):
     id: int
@@ -121,6 +147,7 @@ class Subscription(SubscriptionBase):
     class Config:
         from_attributes = True
 
+
 # Transaction schemas
 class TransactionBase(BaseModel):
     amount: float
@@ -128,10 +155,12 @@ class TransactionBase(BaseModel):
     status: str = "completed"
     credits_added: Optional[int] = None
 
+
 class TransactionCreate(TransactionBase):
     user_id: int
     product_id: Optional[int] = None
     paddle_transaction_id: str
+
 
 class Transaction(TransactionBase):
     id: int
@@ -143,10 +172,12 @@ class Transaction(TransactionBase):
     class Config:
         from_attributes = True
 
+
 # Auth schemas
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
