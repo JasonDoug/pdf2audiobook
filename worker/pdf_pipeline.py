@@ -66,10 +66,13 @@ class AWSPollyTTS(TTSProvider):
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
 
+    import html
+
     def text_to_audio(self, text: str, voice_id: str, speed: float) -> bytes:
         # Polly uses SSML for speed control
         rate = f"{int(speed * 100)}%"
-        ssml_text = f'<speak><prosody rate="{rate}">{text}</prosody></speak>'
+        escaped_text = html.escape(text)
+        ssml_text = f'<speak><prosody rate="{rate}">{escaped_text}</prosody></speak>'
         response = self.client.synthesize_speech(
             Text=ssml_text,
             OutputFormat="mp3",
