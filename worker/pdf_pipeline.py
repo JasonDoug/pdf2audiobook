@@ -117,19 +117,29 @@ class ElevenLabsTTS(TTSProvider):
 # --- TTS MANAGER ---
 class TTSManager:
     def __init__(self):
-        self.providers = {
-            "openai": OpenAITTS(),
-            "google": GoogleTTS(),
-            "aws_polly": AWSPollyTTS(),
-            "azure": AzureTTS(),
-            "eleven_labs": ElevenLabsTTS(),
+        self._provider_map = {
+            "openai": OpenAITTS,
+            "google": GoogleTTS,
+            "aws_polly": AWSPollyTTS,
+            "azure": AzureTTS,
+            "eleven_labs": ElevenLabsTTS,
         }
+        self._instances = {}
 
     def get_provider(self, provider_name: str) -> TTSProvider:
-        provider = self.providers.get(provider_name)
-        if not provider:
+        if provider_name in self._instances:
+            return self._instances[provider_name]
+
+        provider_class = self._provider_map.get(provider_name)
+        if not provider_class:
             raise ValueError(f"Unsupported TTS provider: {provider_name}")
-        return provider
+
+        # Instantiate the provider on first request.
+        # Credential or other instantiation errors will be raised here
+        # and handled by the calling Celery task.
+        instance = provider_class()
+        self._instances[provider_name] = instance
+        return instance
 
 
 # --- PDF PIPELINE ---
