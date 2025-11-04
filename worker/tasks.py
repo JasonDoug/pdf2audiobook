@@ -15,7 +15,10 @@ from app.services.job import JobService
 from app.core.config import settings
 
 # Import PDF processing pipeline
+
 from .pdf_pipeline import PDFToAudioPipeline
+
+pipeline = PDFToAudioPipeline()
 
 
 @celery_app.task(bind=True)
