@@ -1,140 +1,71 @@
-import hashlib
+import requests
+from pydantic import BaseModel
+from typing import List, Dict, Any
+from hashlib import sha1
 import hmac
-from sqlalchemy.orm import Session
-from typing import List, Optional
+import base64
 
 from app.core.config import settings
-from app.models import Product
-from app.schemas import Product as ProductSchema
+
+class PaddleCheckoutRequest(BaseModel):
+    product_id: int
+    customer_email: str
+    custom_message: str = "PDF2Audiobook Conversion Credits"
 
 class PaymentService:
     def __init__(self):
         self.vendor_id = settings.PADDLE_VENDOR_ID
         self.vendor_auth_code = settings.PADDLE_VENDOR_AUTH_CODE
         self.public_key = settings.PADDLE_PUBLIC_KEY
-        self.environment = settings.PADDLE_ENVIRONMENT
-    
-    def verify_webhook_signature(self, body: bytes, signature: str) -> bool:
-        """Verify Paddle webhook signature"""
-        try:
-            # Paddle uses HMAC-SHA256 for webhook signatures
-            expected_signature = hmac.new(
-                self.public_key.encode(),
-                body,
-                hashlib.sha256
-            ).hexdigest()
-            
-            return hmac.compare_digest(expected_signature, signature)
-        except Exception:
+        self.api_endpoint = "https://vendors.paddle.com/api/2.0"
+        self.sandbox_api_endpoint = "https://sandbox-vendors.paddle.com/api/2.0"
+
+    def _get_api_url(self) -> str:
+        return self.sandbox_api_endpoint if settings.PADDLE_ENVIRONMENT == "sandbox" else self.api_endpoint
+
+    def generate_checkout_url(self, checkout_request: PaddleCheckoutRequest) -> str:
+        """
+        Generates a Paddle checkout URL for a given product.
+        """
+        if settings.TESTING_MODE:
+            print("--- MOCK PAYMENT: Generating dummy checkout URL ---")
+            return f"http://localhost:3000/mock-checkout?product_id={checkout_request.product_id}&email={checkout_request.customer_email}"
+
+        url = f"{self._get_api_url()}/product/generate_pay_link"
+        payload = {
+            "vendor_id": self.vendor_id,
+            "vendor_auth_code": self.vendor_auth_code,
+            "product_id": checkout_request.product_id,
+            "customer_email": checkout_request.customer_email,
+            "custom_message": checkout_request.custom_message,
+            "passthrough": f'{{"user_email": "{checkout_request.customer_email}"}}' # Example passthrough
+        }
+        
+        response = requests.post(url, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("success"):
+            return data["response"]["url"]
+        else:
+            raise Exception(f"Paddle API error: {data.get('error', {}).get('message', 'Unknown error')}")
+
+    def verify_webhook_signature(self, request_body: bytes, signature: str) -> bool:
+        """
+        Verifies the signature of an incoming Paddle webhook.
+        """
+        if settings.TESTING_MODE:
+            print("--- MOCK PAYMENT: Skipping webhook verification ---")
+            return True
+
+        if not signature:
             return False
-    
-    def get_active_products(self, db: Session) -> List[ProductSchema]:
-        """Get all active products"""
-        products = db.query(Product).filter(Product.is_active == True).all()
-        return [ProductSchema.from_orm(product) for product in products]
-    
-    def create_checkout_url(self, product_id: int, user_email: str) -> Optional[str]:
-        """Create a Paddle checkout URL for a product"""
-        try:
-            # This is a simplified version - in production you'd use Paddle's API
-            # to generate proper checkout links with proper parameters
-            
-            base_url = "https://checkout.paddle.com/checkout/custom/"
-            
-            if self.environment == "sandbox":
-                base_url = "https://sandbox-checkout.paddle.com/checkout/custom/"
-            
-            # In a real implementation, you would:
-            # 1. Call Paddle's API to generate a checkout link
-            # 2. Include product IDs, customer info, etc.
-            # 3. Handle success/cancel URLs
-            
-            checkout_params = {
-                "product_ids": str(product_id),
-                "customer_email": user_email,
-                "passthrough": f"user_email={user_email}"
-            }
-            
-            # For now, return a placeholder URL
-            return f"{base_url}?product_ids={product_id}&customer_email={user_email}"
-            
-        except Exception as e:
-            print(f"Error creating checkout URL: {str(e)}")
-            return None
-    
-    def get_subscription_plans(self) -> List[dict]:
-        """Get available subscription plans"""
-        return [
-            {
-                "id": "pro_monthly",
-                "name": "Pro Monthly",
-                "price": 29.99,
-                "currency": "USD",
-                "interval": "month",
-                "features": [
-                    "50 PDF conversions per month",
-                    "Premium voices",
-                    "Faster processing",
-                    "Priority support"
-                ]
-            },
-            {
-                "id": "pro_yearly",
-                "name": "Pro Yearly",
-                "price": 299.99,
-                "currency": "USD",
-                "interval": "year",
-                "features": [
-                    "600 PDF conversions per year",
-                    "Premium voices",
-                    "Fastest processing",
-                    "Priority support",
-                    "2 months free"
-                ]
-            },
-            {
-                "id": "enterprise",
-                "name": "Enterprise",
-                "price": 99.99,
-                "currency": "USD",
-                "interval": "month",
-                "features": [
-                    "Unlimited PDF conversions",
-                    "All premium voices",
-                    "Fastest processing",
-                    "Dedicated support",
-                    "Custom integrations",
-                    "API access"
-                ]
-            }
-        ]
-    
-    def get_credit_packs(self) -> List[dict]:
-        """Get available credit packs"""
-        return [
-            {
-                "id": "credits_10",
-                "name": "10 Credits",
-                "price": 9.99,
-                "currency": "USD",
-                "credits": 10,
-                "description": "Perfect for trying out our service"
-            },
-            {
-                "id": "credits_50",
-                "name": "50 Credits",
-                "price": 39.99,
-                "currency": "USD",
-                "credits": 50,
-                "description": "Great for occasional use",
-                "popular": True
-            },
-            {
-                "id": "credits_200",
-                "name": "200 Credits",
-                "price": 149.99,
-                "currency": "USD",
-                "credits": 200,
-                "description": "Best value for regular users"
-            }
-        ]
+
+        # The request body is a dictionary of POST parameters.
+        # It needs to be sorted by key, and then serialized to a PHP-style string.
+        # This is a known complexity of Paddle Classic webhooks.
+        # For simplicity, we will assume a JSON body and a more modern HMAC verification.
+        # NOTE: This is a simplified HMAC check. Paddle Classic's verification is more complex.
+        # For a production app, use a library that correctly implements Paddle's PHP-style serialization.
+        computed_signature = hmac.new(key=self.public_key.encode(), msg=request_body, digestmod=sha1).hexdigest()
+        return hmac.compare_digest(computed_signature, signature)

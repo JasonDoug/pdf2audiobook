@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     
     # Authentication (Clerk)
     CLERK_PEM_PUBLIC_KEY: Optional[str] = None
+    CLERK_JWT_ISSUER: Optional[str] = None # e.g., "https://clerk.your-clerk-domain.com"
+    CLERK_JWT_AUDIENCE: Optional[str] = None # e.g., "https://your-frontend-domain.com"
     
     # Paddle
     PADDLE_VENDOR_ID: int
