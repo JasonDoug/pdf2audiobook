@@ -41,7 +41,7 @@ class PaymentService:
             "passthrough": f'{{"user_email": "{checkout_request.customer_email}"}}' # Example passthrough
         }
         
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=30)
         response.raise_for_status()
         
         data = response.json()
