@@ -1,5 +1,6 @@
 import boto3
 import os
+import asyncio
 from fastapi import UploadFile
 from typing import Optional
 from botocore.exceptions import NoCredentialsError, ClientError
@@ -22,13 +23,16 @@ class StorageService:
             # Read file content
             file_content = await file.read()
             
-            # Upload to S3
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=key,
-                Body=file_content,
-                ContentType=file.content_type
-            )
+            # Upload to S3 asynchronously in a thread pool to avoid blocking the event loop
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None, # Use the default executor
+                lambda: self.s3_client.put_object(
+                    Bucket=self.bucket_name,
+                    Key=key,
+                    Body=file_content,
+                    ContentType=file.content_type
+                ))
             
             # Generate URL
             url = f"https://{self.bucket_name}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
