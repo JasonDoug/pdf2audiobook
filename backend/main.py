@@ -64,12 +64,13 @@ async def health_check():
     """
     try:
         db = SessionLocal()
-        db.execute("SELECT 1")
-        db.close()
-        db_status = "healthy"
+        try:
+            db.execute("SELECT 1")
+            db_status = "healthy"
+        finally:
+            db.close()
     except Exception:
-        db_status = "unhealthy"
-
+            db_status = "unhealthy"
     return {"status": "healthy", "dependencies": {"database": db_status}}
 
 @app.get("/", tags=["System"])

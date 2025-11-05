@@ -10,6 +10,7 @@ from pydub import AudioSegment
 import io
 import re
 from abc import ABC, abstractmethod
+import base64
 
 # TTS Provider Imports
 from google.cloud import texttospeech
