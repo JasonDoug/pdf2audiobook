@@ -1,26 +1,48 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import JWTError, jwt
+from jose import jwt, JWTError, exceptions
 from typing import Optional
 
 from app.core.database import get_db
 from app.core.config import settings
-from app.schemas import User, TokenData
+from app.schemas import User
 from app.services.user import UserService
 
 security = HTTPBearer()
 
 def verify_clerk_token(token: str) -> dict:
+    """
+    Verifies a Clerk JWT token using Clerk's public key and validates issuer/audience.
+    """
+    if not settings.CLERK_PEM_PUBLIC_KEY or not settings.CLERK_JWT_ISSUER or not settings.CLERK_JWT_AUDIENCE:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Clerk authentication not fully configured. Missing public key, issuer, or audience."
+        )
+
     try:
-        # Decode JWT token (Clerk uses RS256, but for simplicity we'll use HS256 here)
-        # In production, you should verify with Clerk's public key
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        # Clerk uses RS256 algorithm and requires verification with its public key.
+        # The issuer (iss) and audience (azp) claims are also validated.
+        payload = jwt.decode(
+            token,
+            key=settings.CLERK_PEM_PUBLIC_KEY,
+            algorithms=["RS256"],
+            audience=settings.CLERK_JWT_AUDIENCE,
+            issuer=settings.CLERK_JWT_ISSUER,
+            options={"verify_signature": True, "verify_aud": True, "verify_iss": True}
+        )
         
         # Extract user information
+        # 'sub' is the user ID in Clerk's JWT
+        # 'email_addresses' is an array, take the first one if available
+        email = None
+        if payload.get("email_addresses") and len(payload["email_addresses"]) > 0:
+            email = payload["email_addresses"][0].get("email_address")
+
         user_data = {
             "auth_provider_id": payload.get("sub"),
-            "email": payload.get("email"),
+            "email": email,
             "first_name": payload.get("given_name"),
             "last_name": payload.get("family_name")
         }

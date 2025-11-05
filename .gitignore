@@ -1,0 +1,60 @@
+# --- Environment Files ---
+# Never commit environment files, which contain secrets.
+.env
+.env.*
+.env.local
+! .env.example
+
+# --- Service Account Keys ---
+# Ignore common names for service account key files (e.g., Google Cloud JSON keys)
+*.json
+!*.json.example
+
+# --- Python ---
+# Byte-compiled / optimized / C extensions
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Virtual Environments ---
+.venv/
+venv/
+env/
+
+# --- IDE / Editor ---
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# --- Testing ---
+.pytest_cache/
+htmlcov/
+.coverage
+test.db
+
+# --- OS-specific ---
+.DS_Store
+Thumbs.db
