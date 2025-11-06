@@ -141,16 +141,21 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # --- Exception Handlers ---
-app.add_exception_handler(HTTPException, http_exception_handler)
-app.add_exception_handler(AppException, app_exception_handler)
-app.add_exception_handler(Exception, general_exception_handler)
+# Temporarily disabled to debug startup issues
+# app.add_exception_handler(HTTPException, http_exception_handler)
+# app.add_exception_handler(AppException, app_exception_handler)
+# app.add_exception_handler(Exception, general_exception_handler)
 
 # --- API Routers ---
 
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
-app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
-app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
+try:
+    app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+    app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
+    app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
+    app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
+except Exception as e:
+    logger.error(f"Failed to include routers: {e}")
+    # Continue without routers if they fail to import
 
 # --- Health Check & Root Endpoint ---
 
