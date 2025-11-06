@@ -15,42 +15,42 @@ class AppException(Exception):
     def __init__(self, message: str, status_code: int = 500):
         self.message = message
         self.status_code = status_code
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 # --- Pipeline-related Exceptions ---
 
 class PDFProcessingError(AppException):
     """Raised for general errors during the PDF processing pipeline."""
-    def __init__(self, message: str = "An error occurred during PDF processing."):
-        super().__init__(message, status_code=500)
+    def __init__(self, message: str = "An error occurred during PDF processing.", status_code: int = 500):
+        super().__init__(message, status_code)
 
 class TextExtractionError(PDFProcessingError):
     """Raised when text cannot be extracted from a PDF, possibly due to corruption or being image-only without successful OCR."""
     def __init__(self, message: str = "Failed to extract any text from the provided PDF."):
-        super().__init__(message, status_code=400)  # Bad Request, as it's likely a user file issue
+        super().__init__(message, 400)  # Bad Request, as it's likely a user file issue
 
 class TTSServiceError(PDFProcessingError):
     """Raised when a text-to-speech service fails."""
     def __init__(self, provider: str, original_error: str):
         message = f"The '{provider}' text-to-speech service failed. Details: {original_error}"
-        super().__init__(message, status_code=502)  # Bad Gateway, as it's an upstream service error
+        super().__init__(message, 502)  # Bad Gateway, as it's an upstream service error
 
 class SummaryGenerationError(PDFProcessingError):
     """Raised when the summary generation (e.g., OpenAI API) fails."""
     def __init__(self, original_error: str):
         message = f"Failed to generate summary. Details: {original_error}"
-        super().__init__(message, status_code=502) # Bad Gateway
+        super().__init__(message, 502) # Bad Gateway
 
 class StorageError(AppException):
     """Raised for errors related to file storage operations (e.g., S3)."""
     def __init__(self, message: str = "A storage service error occurred."):
-        super().__init__(message, status_code=500)
+        super().__init__(message, 500)
 
 
 # --- Exception Handlers ---
 
-async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handle HTTP exceptions with proper logging and response formatting."""
     logger.warning(
         f"HTTP Exception: {exc.status_code} - {exc.detail} - Path: {request.url.path}"
@@ -68,7 +68,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
 
-async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with proper logging and generic error response."""
     logger.error(
         f"Unexpected error: {str(exc)} - Path: {request.url.path} - Headers: {dict(request.headers)}"
@@ -87,7 +87,7 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
     )
 
 
-async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     """Handle custom application exceptions."""
     logger.error(
         f"Application Exception: {exc.status_code} - {exc.message} - Path: {request.url.path}"
