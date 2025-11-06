@@ -56,6 +56,7 @@ def process_pdf_task(self, job_id: int):
             voice_type=job.voice_type,
             reading_speed=float(job.reading_speed),
             include_summary=job.include_summary,
+            conversion_mode=job.conversion_mode.value,
             progress_callback=lambda progress: job_service.update_job_status(
                 job_id, JobStatus.PROCESSING, progress
             ),

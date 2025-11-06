@@ -180,6 +180,7 @@ class PDFToAudioPipeline:
         voice_type: str = "default",
         reading_speed: float = 1.0,
         include_summary: bool = False,
+        conversion_mode: str = "full",
         progress_callback: Optional[Callable[[int], None]] = None,
     ) -> bytes:
         try:
@@ -195,7 +196,7 @@ class PDFToAudioPipeline:
             cleaned_text = self._advanced_text_cleanup(raw_text)
 
             final_text = self._get_final_text(
-                cleaned_text, include_summary, progress_callback
+                cleaned_text, include_summary, conversion_mode, progress_callback
             )
 
             if progress_callback:
@@ -228,8 +229,13 @@ class PDFToAudioPipeline:
         except Exception as e:
             raise Exception(f"PDF processing failed: {str(e)}")
 
-    def _get_final_text(self, cleaned_text, include_summary, progress_callback):
-        if include_summary:
+    def _get_final_text(self, cleaned_text, include_summary, conversion_mode, progress_callback):
+        if conversion_mode == "summary_explanation":
+            if progress_callback:
+                progress_callback(25)
+            explanation = self._generate_concept_explanation(cleaned_text)
+            return explanation
+        elif include_summary:
             if progress_callback:
                 progress_callback(25)
             summary = self._generate_summary(cleaned_text)
@@ -300,6 +306,33 @@ class PDFToAudioPipeline:
             return response.choices[0].message.content.strip()
         except Exception:
             return text[:500] + "..."
+
+    def _generate_concept_explanation(self, text: str) -> str:
+        """Generate a comprehensive explanation of core concepts from the text."""
+        try:
+            client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            max_length = 10000  # Larger context for concept extraction
+            truncated_text = text[:max_length] if len(text) > max_length else text
+
+            response = client.chat.completions.create(
+                model="gpt-4",  # Use GPT-4 for better concept analysis
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """Analyze the provided text and create a comprehensive explanation of its core concepts.
+                        Structure your response with clear section headings (like "CHAPTER 1: CONCEPT NAME") that will be used for chapterization.
+                        Focus on explaining key ideas, methodologies, findings, and conclusions in a narrative form suitable for audio conversion.
+                        Make the explanation educational and accessible, as if teaching the concepts to someone new to the topic.""",
+                    },
+                    {"role": "user", "content": truncated_text},
+                ],
+                max_tokens=2000,  # Longer output for comprehensive explanation
+                temperature=0.2,  # Lower temperature for more focused explanations
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            # Fallback: generate a basic summary-style explanation
+            return f"This document explores key concepts and ideas. {text[:1000]}... The main themes and conclusions are presented in a structured format suitable for understanding the core content."
 
     def _chapterize_text(self, text: str, min_chapter_length_sentences=20) -> List[str]:
         sentences = re.split(r"(?<=[.!?])\s+", text)

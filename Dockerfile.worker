@@ -1,17 +1,62 @@
-FROM python:3.12-slim
+# Multi-stage build for optimized worker image
+FROM python:3.12-slim as builder
 
-WORKDIR /app
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
+# Install uv for fast Python package management
+RUN pip install --no-cache-dir uv
+
+# Set up virtual environment
+RUN uv venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install Python dependencies
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Production stage
+FROM python:3.12-slim as production
+
+# Install runtime system dependencies
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
     poppler-utils \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-COPY pyproject.toml uv.lock ./
-RUN pip install uv
-RUN uv sync --frozen
+# Create non-root user for security
+RUN groupadd -r worker && useradd -r -g worker worker
 
-COPY . .
+# Set working directory
+WORKDIR /app
 
-CMD ["celery", "-A", "worker.celery_app", "worker", "--loglevel=info"]
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application code
+COPY --chown=worker:worker . .
+
+# Create logs directory with proper permissions
+RUN mkdir -p logs && chown -R worker:worker logs
+
+# Switch to non-root user
+USER worker
+
+# Health check for worker (check if celery can connect to broker)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
+    CMD celery -A worker.celery_app inspect ping || exit 1
+
+# Run worker with production settings
+CMD ["celery", "-A", "worker.celery_app", "worker", \
+     "--loglevel=info", \
+     "--concurrency=2", \
+     "--pool=prefork", \
+     "--max-tasks-per-child=1000"]

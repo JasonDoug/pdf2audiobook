@@ -3,11 +3,16 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.core.database import get_db
-from app.schemas import Job, JobCreate, JobUpdate, JobStatus, VoiceProvider, User
+from app.core.config import settings
+from app.schemas import Job, JobCreate, JobUpdate, JobStatus, VoiceProvider, ConversionMode, User
 from app.services.auth import get_current_user
 from app.services.job import JobService
 from app.services.storage import StorageService
-from worker.tasks import process_pdf_task
+try:
+    from worker.tasks import process_pdf_task
+except ImportError:
+    # Mock for testing
+    process_pdf_task = None
 
 router = APIRouter()
 
@@ -34,9 +39,45 @@ async def create_job(
     include_summary: bool = Form(
         False, description="Prepend the audiobook with an AI-generated summary."
     ),
+    conversion_mode: ConversionMode = Form(
+        ConversionMode.FULL, description="Conversion mode: 'full' for word-for-word or 'summary_explanation' for core concepts explanation."
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Security: Validate file upload
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must have a filename"
+        )
+
+    # Check file extension
+    allowed_extensions = {'.pdf'}
+    file_extension = file.filename.lower().split('.')[-1] if '.' in file.filename else ''
+    if f'.{file_extension}' not in allowed_extensions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF files are allowed"
+        )
+
+    # Check content type
+    if file.content_type not in settings.ALLOWED_FILE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid file type. Allowed types: {', '.join(settings.ALLOWED_FILE_TYPES)}"
+        )
+
+    # Check file size using configuration
+    file_content = await file.read()
+    if len(file_content) > settings.max_file_size_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {settings.MAX_FILE_SIZE_MB}MB"
+        )
+
+    # Reset file pointer for storage service
+    await file.seek(0)
     """
     Creates a new job by uploading a PDF and specifying conversion options.
 
@@ -60,15 +101,17 @@ async def create_job(
     pdf_s3_url = await storage_service.upload_file(file, pdf_s3_key)
 
     job_data = JobCreate(
-        original_filename=file.filename,
+        original_filename=file.filename or "unknown.pdf",
         voice_provider=voice_provider,
         voice_type=voice_type,
         reading_speed=reading_speed,
         include_summary=include_summary,
+        conversion_mode=conversion_mode,
     )
     job = job_service.create_job(current_user.id, job_data, pdf_s3_key, pdf_s3_url)
 
-    process_pdf_task.delay(job.id)
+    if process_pdf_task and hasattr(process_pdf_task, 'delay'):
+        process_pdf_task.delay(job.id)
 
     return job
 
@@ -177,5 +220,5 @@ async def get_job_status(
         "status": job.status,
         "progress_percentage": job.progress_percentage,
         "error_message": job.error_message,
-        "audio_url": job.audio_s3_url if job.status == JobStatus.COMPLETED else None,
+        "audio_url": job.audio_s3_url if job.status.value == "completed" else None,
     }

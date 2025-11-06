@@ -38,6 +38,13 @@ class VoiceProvider(str, Enum):
     ELEVEN_LABS = "eleven_labs"
 
 
+class ConversionMode(str, Enum):
+    """Enumeration for PDF conversion modes."""
+
+    FULL = "full"
+    SUMMARY_EXPLANATION = "summary_explanation"
+
+
 # --- User Schemas ---
 
 
@@ -143,6 +150,10 @@ class JobBase(BaseModel):
     include_summary: bool = Field(
         False,
         description="Whether to generate and include an AI summary at the beginning of the audiobook.",
+    )
+    conversion_mode: ConversionMode = Field(
+        ConversionMode.FULL,
+        description="Conversion mode: full word-for-word conversion or summary explanation of core concepts.",
     )
 
 

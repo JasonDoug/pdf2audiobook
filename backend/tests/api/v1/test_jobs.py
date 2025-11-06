@@ -4,6 +4,7 @@ from unittest.mock import patch
 from app.models import Job, User, JobStatus
 from app.core.database import get_db
 from app.services.auth import get_current_user
+from app.services.storage import StorageService
 
 
 # Fixtures
@@ -12,46 +13,35 @@ def mock_user():
     return User(id=1, email="test@test.com")
 
 
-@pytest.fixture
-def client(db_session, mock_user):
-    def override_get_db():
-        yield db_session
 
-    def override_get_current_user():
-        return mock_user
-
-    from app.main import app
-
-    app.dependency_overrides[get_db] = override_get_db
-    app.dependency_overrides[get_current_user] = override_get_current_user
-
-    yield TestClient(app)
-
-    app.dependency_overrides.clear()
 
 
 # Tests
 def test_create_job_success(client: TestClient, db_session):
     with (
-        patch(
-            "app.services.storage.StorageService.upload_file",
+        patch.object(
+            StorageService, "upload_file",
             return_value="http://s3.com/test.pdf",
         ),
-        patch("worker.tasks.process_pdf_task.delay") as mock_delay,
+        patch("app.api.v1.jobs.process_pdf_task") as mock_task,
     ):
         response = client.post(
             "/api/v1/jobs/",
+            data={"voice_provider": "openai", "voice_type": "default", "reading_speed": "1.0", "include_summary": "false", "conversion_mode": "full"},
             files={"file": ("test.pdf", b"pdf content", "application/pdf")},
+            headers={"Authorization": "Bearer dev-secret-key-for-testing-only"},
         )
+        if response.status_code != 200:
+            print(f"Response body: {response.text}")
         assert response.status_code == 200
         data = response.json()
         assert data["original_filename"] == "test.pdf"
         assert data["status"] == "pending"
-        mock_delay.assert_called_once_with(data["id"])
+        mock_task.delay.assert_called_once_with(data["id"])
 
 
 def test_get_job_by_id(client: TestClient, db_session, mock_user):
-    job = Job(id=1, original_filename="test.pdf", user_id=mock_user.id)
+    job = Job(id=1, original_filename="test.pdf", pdf_s3_key="test.pdf", user_id=mock_user.id)
     db_session.add(job)
     db_session.commit()
 
@@ -65,6 +55,7 @@ def test_update_job_manual(client: TestClient, db_session, mock_user):
     job = Job(
         id=1,
         original_filename="test.pdf",
+        pdf_s3_key="test.pdf",
         user_id=mock_user.id,
         status=JobStatus.PENDING,
         progress_percentage=0,
@@ -92,6 +83,7 @@ def test_get_job_status(client: TestClient, db_session, mock_user):
     job = Job(
         id=1,
         original_filename="test.pdf",
+        pdf_s3_key="test.pdf",
         user_id=mock_user.id,
         status=JobStatus.COMPLETED,
         progress_percentage=100,

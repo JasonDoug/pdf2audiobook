@@ -1,12 +1,21 @@
 import pytest
+import sys
+import os
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.main import app
-from app.core.database import get_db, Base
+# Set testing mode
+os.environ["TESTING_MODE"] = "true"
+
+# Add app directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app'))
+
+from main import app
+from app.core.database import get_db
+from app.models import Base, User
 from app.services.auth import get_current_user
-from app.models import User
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
@@ -38,7 +47,7 @@ def client(db_session):
     def override_get_current_user():
         user = db_session.query(User).first()
         if not user:
-            user = User(id=1, auth_provider_id="test_user", email="test@example.com")
+            user = User(id=1, auth_provider_id="dev_user_123", email="dev@example.com")
             db_session.add(user)
             db_session.commit()
         return user

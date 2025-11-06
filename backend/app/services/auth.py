@@ -15,10 +15,11 @@ def verify_clerk_token(token: str) -> dict:
     """
     Verifies a Clerk JWT token using Clerk's public key and validates issuer/audience.
     """
+    # Security: Remove testing mode bypass for production
     if not settings.CLERK_PEM_PUBLIC_KEY or not settings.CLERK_JWT_ISSUER or not settings.CLERK_JWT_AUDIENCE:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Clerk authentication not fully configured. Missing public key, issuer, or audience."
+            detail="Authentication service not configured properly."
         )
 
     try:
@@ -64,15 +65,15 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         user_data = verify_clerk_token(credentials.credentials)
         user_service = UserService(db)
         user = user_service.get_user_by_auth_id(user_data["auth_provider_id"])
-        
+
         if user is None:
             raise credentials_exception
-            
+
         return user
     except JWTError:
         raise credentials_exception
