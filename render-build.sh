@@ -3,6 +3,9 @@ set -e
 
 echo "🚀 Starting PDF2Audiobook backend build for Render..."
 
+# Change to backend directory
+cd backend
+
 # Install dependencies using uv
 echo "📦 Installing dependencies..."
 uv sync --frozen --no-install-project

@@ -3,6 +3,9 @@ set -e
 
 echo "🚀 Starting PDF2Audiobook backend on Render..."
 
+# Change to backend directory
+cd backend
+
 # Run database migrations on startup
 echo "🗄️ Running database migrations..."
 uv run alembic upgrade head
