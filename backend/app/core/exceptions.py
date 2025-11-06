@@ -8,6 +8,7 @@ more informative logging and API error responses.
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
+from typing import Union
 
 class AppException(Exception):
     """Base class for all application-specific exceptions."""
@@ -49,7 +50,7 @@ class StorageError(AppException):
 
 # --- Exception Handlers ---
 
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handle HTTP exceptions with proper logging and response formatting."""
     logger.warning(
         f"HTTP Exception: {exc.status_code} - {exc.detail} - Path: {request.url.path}"
@@ -67,7 +68,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-async def general_exception_handler(request: Request, exc: Exception):
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with proper logging and generic error response."""
     logger.error(
         f"Unexpected error: {str(exc)} - Path: {request.url.path} - Headers: {dict(request.headers)}"
@@ -86,7 +87,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-async def app_exception_handler(request: Request, exc: AppException):
+async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     """Handle custom application exceptions."""
     logger.error(
         f"Application Exception: {exc.status_code} - {exc.message} - Path: {request.url.path}"
