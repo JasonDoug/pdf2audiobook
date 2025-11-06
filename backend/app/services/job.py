@@ -45,12 +45,12 @@ class JobService:
             .all()
         )
 
-    def update_job(self, job_id: int, job_update: JobUpdate) -> Optional[Job]:
+    def update_job(self, job_id: int, job_update: dict) -> Optional[Job]:
         job = self.db.query(Job).filter(Job.id == job_id).first()
         if not job:
             return None
 
-        for field, value in job_update.dict(exclude_unset=True).items():
+        for field, value in job_update.items():
             setattr(job, field, value)
 
         self.db.commit()

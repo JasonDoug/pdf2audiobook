@@ -25,8 +25,16 @@ FastAPI Backend
 Celery Workers + Redis
     ↓ Direct Calls
 PDF Processing Pipeline
-    ↓ External APIs
-OpenAI/Tesseract/AWS S3
+    ↓ Multi-Provider TTS
+├── OpenAI TTS
+├── Google Cloud TTS  
+├── AWS Polly
+├── Azure Speech
+└── ElevenLabs
+    ↓ External Services
+├── AWS S3 (Storage)
+├── OpenAI API (Summary)
+└── Tesseract OCR (Fallback)
 ```
 
 ### Key Interfaces
@@ -100,8 +108,23 @@ PADDLE_VENDOR_ID=your-vendor-id
 PADDLE_VENDOR_AUTH_CODE=your-vendor-auth-code
 PADDLE_PUBLIC_KEY=your-paddle-public-key
 
-# OpenAI
+# OpenAI (TTS + Summary)
 OPENAI_API_KEY=your-openai-api-key
+
+# Google Cloud Text-to-Speech
+GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
+
+# AWS Polly
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=us-east-1
+
+# Azure Cognitive Services Speech
+AZURE_SPEECH_KEY=your-azure-speech-key
+AZURE_SPEECH_REGION=your-azure-region
+
+# ElevenLabs
+ELEVENLABS_API_KEY=your-elevenlabs-api-key
 ```
 
 ## 📁 Code Organization
@@ -309,57 +332,259 @@ celery_app.conf.update(
 
 ## 📄 PDF Pipeline Integration
 
+### Multi-Provider TTS Architecture
+The pipeline supports 5 TTS providers with a unified interface:
+
+```python
+# TTS Provider Interface
+class TTSProvider(ABC):
+    @abstractmethod
+    def text_to_audio(self, text: str, voice_id: str, speed: float) -> bytes:
+        pass
+
+# Supported Providers
+TTS_PROVIDERS = {
+    "openai": OpenAITTS,           # OpenAI TTS-1
+    "google": GoogleTTS,           # Google Cloud Text-to-Speech
+    "aws_polly": AWSPollyTTS,      # AWS Polly
+    "azure": AzureTTS,             # Azure Cognitive Services
+    "eleven_labs": ElevenLabsTTS   # ElevenLabs
+}
+```
+
 ### Pipeline Interface
 ```python
-# The pipeline is completely independent
 class PDFToAudioPipeline:
     def process_pdf(
         self, 
-        pdf_path: str, 
+        pdf_path: str,
+        voice_provider: str = "openai",
         voice_type: str = "default",
         reading_speed: float = 1.0,
         include_summary: bool = False,
         progress_callback: Optional[Callable[[int], None]] = None
     ) -> bytes:
         """
-        Convert PDF to audio using OCR and TTS
-        Returns: Audio data as bytes
+        Convert PDF to audio using intelligent text extraction and multi-provider TTS
+        Returns: Audio data as bytes (MP3 format)
         """
 ```
 
 ### Worker Integration
 ```python
-# Worker calls pipeline with progress callback
+# Worker calls pipeline with voice provider from job model
 pipeline = PDFToAudioPipeline()
 audio_data = pipeline.process_pdf(
     pdf_path=pdf_path,
+    voice_provider=job.voice_provider.value,  # Uses VoiceProvider enum
     voice_type=job.voice_type,
     reading_speed=float(job.reading_speed),
     include_summary=job.include_summary,
-    progress_callback=lambda progress: (
-        self.update_state(state='PROGRESS', meta={'progress': progress}),
-        job_service.update_job_status(job_id, JobStatus.PROCESSING, progress)
+    progress_callback=lambda progress: job_service.update_job_status(
+        job_id, JobStatus.PROCESSING, progress
     )
 )
 ```
 
-### Progress Callbacks
+### Intelligent Text Extraction
 ```python
-# Pipeline reports progress at key steps
+def _extract_text(self, pdf_path: str) -> str:
+    """
+    Smart text extraction with OCR fallback:
+    1. Try PyMuPDF text extraction first (fast, accurate for text PDFs)
+    2. If extracted text < 100 chars, fall back to OCR
+    3. OCR uses pdf2image + pytesseract at 300 DPI
+    """
+    with fitz.open(pdf_path) as doc:
+        text = "".join(page.get_text() for page in doc)
+    
+    # Use OCR only if text extraction fails
+    if len(text.strip()) < 100:
+        return self._ocr_pdf(pdf_path)
+    return text
+```
+
+### Progress Tracking
+```python
+# Detailed progress milestones
 def process_pdf(self, pdf_path: str, progress_callback=None):
-    # Step 1: Extract text (10%)
-    if progress_callback:
-        progress_callback(10)
+    # 5% - Start processing
+    progress_callback(5)
     
-    text_content = self._extract_text_from_pdf(pdf_path)
+    # 15% - Text extraction complete
+    raw_text = self._extract_text(pdf_path)
+    progress_callback(15)
     
-    # Step 2: Clean text (20%)
-    if progress_callback:
-        progress_callback(20)
+    # 35% - Text cleanup and optional summary complete
+    cleaned_text = self._advanced_text_cleanup(raw_text)
+    final_text = self._get_final_text(cleaned_text, include_summary)
+    progress_callback(35)
     
-    cleaned_text = self._clean_text(text_content)
+    # 40-95% - Chapter-by-chapter TTS processing
+    chapters = self._chapterize_text(final_text)
+    for i, chapter_text in enumerate(chapters):
+        progress = 40 + int((i / len(chapters)) * 55)
+        progress_callback(progress)
+        # Process chapter with selected TTS provider
     
-    # Continue with remaining steps...
+    # 100% - Audio assembly complete
+    progress_callback(100)
+```
+
+### Advanced Text Processing
+```python
+def _advanced_text_cleanup(self, text: str) -> str:
+    """
+    Comprehensive text cleanup:
+    - Normalize whitespace and line breaks
+    - Fix common encoding issues (â, â, â, etc.)
+    - Replace ligatures (ﬁ → fi, ﬂ → fl)
+    - Remove excessive spacing
+    """
+
+def _chapterize_text(self, text: str) -> List[str]:
+    """
+    Intelligent chapterization:
+    - Detect headings (CHAPTER, SECTION, or ALL CAPS)
+    - Group sentences into logical chapters
+    - Minimum 20 sentences per chapter
+    - Fallback to single chapter if no headings found
+    """
+
+def _generate_summary(self, text: str) -> str:
+    """
+    AI-powered summary generation:
+    - Uses OpenAI GPT-3.5-turbo for summarization
+    - Truncates to 12,000 characters for API limits
+    - 150-word target summary
+    - Fallback to text truncation if API fails
+    """
+```
+
+## 🎤 TTS Provider Configuration
+
+### Provider Selection Strategy
+```python
+# VoiceProvider enum in models
+class VoiceProvider(enum.Enum):
+    OPENAI = "openai"           # Fast, cost-effective, good quality
+    GOOGLE = "google"           # High quality, more voices
+    AWS_POLLY = "aws_polly"      # Reliable, SSML support
+    AZURE = "azure"             # Neural voices, enterprise
+    ELEVEN_LABS = "eleven_labs" # Premium quality, higher cost
+```
+
+### Voice Mapping by Provider
+```python
+# OpenAI Voice Mapping
+OPENAI_VOICES = {
+    "default": "alloy",
+    "female": "nova", 
+    "male": "onyx"
+}
+
+# Google Voice Mapping  
+GOOGLE_VOICES = {
+    "default": "en-US-Neural2-D",
+    "female": "en-US-Neural2-F",
+    "male": "en-US-Neural2-D"
+}
+
+# AWS Polly Voice Mapping
+POLLY_VOICES = {
+    "default": "Joanna",
+    "female": "Joanna",
+    "male": "Matthew"
+}
+
+# Azure Voice Mapping
+AZURE_VOICES = {
+    "default": "en-US-JennyNeural",
+    "female": "en-US-JennyNeural", 
+    "male": "en-US-GuyNeural"
+}
+
+# ElevenLabs Voice Mapping
+ELEVENLABS_VOICES = {
+    "default": "Rachel",
+    "female": "Rachel",
+    "male": "Adam"
+}
+```
+
+### Speed Control Implementation
+```python
+# Different providers handle speed differently:
+
+# OpenAI: Direct speed parameter
+response = client.audio.speech.create(
+    model="tts-1", voice=voice, input=text, speed=speed
+)
+
+# AWS Polly: SSML prosody rate
+rate = f"{int(speed * 100)}%"
+ssml = f'<speak><prosody rate="{rate}">{text}</prosody></speak>'
+
+# Azure: SSML prosody rate  
+rate = f"{speed:.2f}"
+ssml = f'<speak><voice name="{voice}"><prosody rate="{rate}">{text}</prosody></voice></speak>'
+
+# Google: Speaking rate in config
+audio_config = texttospeech.AudioConfig(
+    speaking_rate=speed
+)
+
+# ElevenLabs: Speed controlled in voice studio settings
+# No direct speed parameter in API
+```
+
+### Provider-Specific Error Handling
+```python
+class TTSManager:
+    def get_provider(self, provider_name: str) -> TTSProvider:
+        try:
+            if provider_name in self._instances:
+                return self._instances[provider_name]
+            
+            provider_class = self._provider_map.get(provider_name)
+            if not provider_class:
+                raise ValueError(f"Unsupported TTS provider: {provider_name}")
+            
+            # Instantiate provider - credential errors surface here
+            instance = provider_class()
+            self._instances[provider_name] = instance
+            return instance
+            
+        except Exception as e:
+            # Log provider-specific initialization errors
+            logger.error(f"Failed to initialize {provider_name} TTS: {e}")
+            raise
+```
+
+### Cost and Quality Considerations
+- **OpenAI**: Fastest processing, lowest cost, good quality
+- **Google**: Higher quality, more voice options, moderate cost  
+- **AWS Polly**: Reliable, SSML support, enterprise features
+- **Azure**: Neural voices, good for enterprise, moderate cost
+- **ElevenLabs**: Premium quality, highest cost, best for narration
+
+### Provider Fallback Strategy
+```python
+# Future enhancement: automatic fallback
+def get_audio_with_fallback(
+    text: str, 
+    primary_provider: str,
+    fallback_providers: List[str] = ["openai", "google"]
+):
+    for provider_name in [primary_provider] + fallback_providers:
+        try:
+            provider = tts_manager.get_provider(provider_name)
+            return provider.text_to_audio(text, voice, speed)
+        except Exception as e:
+            logger.warning(f"Provider {provider_name} failed: {e}")
+            continue
+    
+    raise Exception("All TTS providers failed")
 ```
 
 ## 🚨 Error Handling & Logging
