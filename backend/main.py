@@ -184,12 +184,15 @@ async def health_check():
         logger.warning(f"Database health check failed: {e}")
         db_status = "unhealthy"
 
+    redis_url = settings.REDIS_URL
     try:
-        redis_client = redis.from_url(settings.REDIS_URL)
-        redis_client.ping()
+        logger.info(f"Attempting Redis connection to: {redis_url}")
+        redis_client = redis.from_url(redis_url)
+        result = redis_client.ping()
+        logger.info(f"Redis ping result: {result}")
         redis_status = "healthy"
     except Exception as e:
-        logger.warning(f"Redis health check failed: {e} - URL: {settings.REDIS_URL}")
+        logger.error(f"Redis health check failed: {e} - URL: {redis_url}")
         redis_status = "unhealthy"
 
     # Security: Only test S3 connectivity if credentials are configured
