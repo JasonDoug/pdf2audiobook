@@ -141,10 +141,9 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # --- Exception Handlers ---
-# Temporarily disabled to debug startup issues
-# app.add_exception_handler(HTTPException, http_exception_handler)
-# app.add_exception_handler(AppException, app_exception_handler)
-# app.add_exception_handler(Exception, general_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(AppException, app_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 # --- API Routers ---
 

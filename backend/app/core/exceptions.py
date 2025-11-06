@@ -50,7 +50,7 @@ class StorageError(AppException):
 
 # --- Exception Handlers ---
 
-def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handle HTTP exceptions with proper logging and response formatting."""
     logger.warning(
         f"HTTP Exception: {exc.status_code} - {exc.detail} - Path: {request.url.path}"
@@ -68,7 +68,7 @@ def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse
     )
 
 
-def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with proper logging and generic error response."""
     logger.error(
         f"Unexpected error: {str(exc)} - Path: {request.url.path} - Headers: {dict(request.headers)}"
@@ -87,7 +87,7 @@ def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     )
 
 
-def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     """Handle custom application exceptions."""
     logger.error(
         f"Application Exception: {exc.status_code} - {exc.message} - Path: {request.url.path}"
