@@ -198,17 +198,21 @@ async def health_check():
     # Security: Only test S3 connectivity if credentials are configured
     if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.S3_BUCKET_NAME:
         try:
+            logger.info(f"Testing S3 connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_client = boto3.client(
                 "s3",
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_REGION,
             )
-            s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
+            result = s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
+            logger.info(f"S3 head_bucket result: {result}")
             s3_status = "healthy"
-        except Exception:
+        except Exception as e:
+            logger.error(f"S3 health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_status = "unhealthy"
     else:
+        logger.info("S3 credentials not fully configured")
         s3_status = "not_configured"
 
     # Determine overall status
