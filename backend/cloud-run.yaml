@@ -1,0 +1,18 @@
+# Google Cloud Run Deployment
+
+# This file configures Google Cloud Run deployment
+# Use with: gcloud run deploy --source .
+
+[run]
+service = "pdf2audiobook-backend"
+region = "us-central1"
+platform = "managed"
+allow-unauthenticated = true
+port = "8000"
+memory = "1Gi"
+cpu = "1"
+max-instances = "10"
+timeout = "900"
+
+# Environment variables will be set via gcloud or console
+# gcloud run services update pdf2audiobook-backend --set-env-vars DATABASE_URL=...,REDIS_URL=...

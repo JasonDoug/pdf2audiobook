@@ -1,0 +1,27 @@
+# Azure App Service Deployment Configuration
+
+# This file configures Azure App Service deployment
+# Use with: az webapp up --resource-group myResourceGroup --name myAppName --runtime PYTHON:3.12
+
+[app_service]
+name = "pdf2audiobook-backend"
+runtime = "PYTHON:3.12"
+location = "East US"
+sku = "B1"  # Basic tier, upgrade for production
+always_on = true
+
+# App settings (environment variables)
+[app_service.app_settings]
+SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+ENABLE_ORYX_BUILD = "true"
+DATABASE_URL = ""
+REDIS_URL = ""
+SECRET_KEY = ""
+CLERK_PEM_PUBLIC_KEY = ""
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+S3_BUCKET_NAME = ""
+PADDLE_VENDOR_ID = ""
+PADDLE_VENDOR_AUTH_CODE = ""
+OPENAI_API_KEY = ""
+ENVIRONMENT = "production"

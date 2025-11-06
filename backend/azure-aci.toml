@@ -1,0 +1,40 @@
+# Azure Container Instances Deployment
+
+# Deploy to ACI using Azure CLI
+# az container create --resource-group myResourceGroup --name pdf2audiobook-backend \
+#   --image your-registry.azurecr.io/pdf2audiobook-backend:latest \
+#   --cpu 1 --memory 1.5 \
+#   --registry-login-server your-registry.azurecr.io \
+#   --registry-username your-username \
+#   --registry-password your-password \
+#   --ports 8000 \
+#   --environment-variables \
+#     DATABASE_URL='postgresql://...' \
+#     REDIS_URL='redis://...' \
+#     SECRET_KEY='your-secret-key' \
+#     CLERK_PEM_PUBLIC_KEY='your-clerk-key' \
+#   --secure-environment-variables \
+#     AWS_ACCESS_KEY_ID='your-aws-key' \
+#     AWS_SECRET_ACCESS_KEY='your-aws-secret' \
+#   --restart-policy Always
+
+# Container configuration
+image = "your-registry.azurecr.io/pdf2audiobook-backend:latest"
+cpu = 1
+memory = "1.5Gi"
+ports = [8000]
+restart_policy = "Always"
+
+# Environment variables
+[environment_variables]
+DATABASE_URL = ""
+REDIS_URL = ""
+SECRET_KEY = ""
+CLERK_PEM_PUBLIC_KEY = ""
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+S3_BUCKET_NAME = ""
+PADDLE_VENDOR_ID = ""
+PADDLE_VENDOR_AUTH_CODE = ""
+OPENAI_API_KEY = ""
+ENVIRONMENT = "production"
