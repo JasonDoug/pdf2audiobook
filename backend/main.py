@@ -208,17 +208,18 @@ async def health_check():
             # Try head_bucket first, fallback to list_buckets if permissions don't allow
             try:
                 result = s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
-                logger.info(f"S3 head_bucket result: {result}")
+                logger.info(f"S3 head_bucket successful for bucket: {settings.S3_BUCKET_NAME}")
                 s3_status = "healthy"
             except Exception as head_error:
                 logger.warning(f"S3 head_bucket failed: {head_error}, trying list_buckets")
-                # Fallback: try to list buckets to verify credentials work
-                buckets = s3_client.list_buckets()
-                if buckets.get('Buckets'):
-                    logger.info(f"S3 credentials work, found {len(buckets['Buckets'])} buckets")
+                try:
+                    # Fallback: try to list buckets to verify credentials work
+                    buckets = s3_client.list_buckets()
+                    logger.info(f"S3 credentials work, can list {len(buckets.get('Buckets', []))} buckets")
                     s3_status = "healthy"
-                else:
-                    raise head_error
+                except Exception as list_error:
+                    logger.error(f"S3 list_buckets also failed: {list_error}")
+                    s3_status = "unhealthy"
         except Exception as e:
             logger.error(f"S3 health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_status = "unhealthy"
