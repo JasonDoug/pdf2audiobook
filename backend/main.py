@@ -188,8 +188,9 @@ async def health_check():
         redis_client = redis.from_url(settings.REDIS_URL)
         if redis_client.ping():
             redis_status = "healthy"
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Redis health check failed: {e}")
+        redis_status = "unhealthy"
 
     # Security: Only test S3 connectivity if credentials are configured
     if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.S3_BUCKET_NAME:
