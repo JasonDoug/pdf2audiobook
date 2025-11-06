@@ -196,17 +196,20 @@ async def health_check():
         redis_status = "unhealthy"
 
     # Security: Only test S3 connectivity if credentials are configured
+    logger.info(f"S3 check: AWS_ACCESS_KEY_ID set: {bool(settings.AWS_ACCESS_KEY_ID)}, AWS_SECRET_ACCESS_KEY set: {bool(settings.AWS_SECRET_ACCESS_KEY)}, S3_BUCKET_NAME set: {bool(settings.S3_BUCKET_NAME)}")
     if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.S3_BUCKET_NAME:
+        logger.info(f"S3 credentials configured, testing connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
         try:
-            logger.info(f"Testing S3 connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_client = boto3.client(
                 "s3",
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_REGION,
             )
+            logger.info("S3 client created successfully")
             # Try head_bucket first, fallback to list_buckets if permissions don't allow
             try:
+                logger.info(f"Attempting head_bucket on {settings.S3_BUCKET_NAME}")
                 result = s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
                 logger.info(f"S3 head_bucket successful for bucket: {settings.S3_BUCKET_NAME}")
                 s3_status = "healthy"
@@ -214,6 +217,7 @@ async def health_check():
                 logger.warning(f"S3 head_bucket failed: {head_error}, trying list_buckets")
                 try:
                     # Fallback: try to list buckets to verify credentials work
+                    logger.info("Attempting list_buckets")
                     buckets = s3_client.list_buckets()
                     logger.info(f"S3 credentials work, can list {len(buckets.get('Buckets', []))} buckets")
                     s3_status = "healthy"
@@ -221,7 +225,7 @@ async def health_check():
                     logger.error(f"S3 list_buckets also failed: {list_error}")
                     s3_status = "unhealthy"
         except Exception as e:
-            logger.error(f"S3 health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
+            logger.error(f"S3 client creation/health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_status = "unhealthy"
     else:
         logger.info("S3 credentials not fully configured")
