@@ -51,73 +51,19 @@ pdf2audiobook/
 └── pyproject.toml         # Project dependencies
 ```
 
-## Setup Instructions
+## Docker Setup
 
-### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL
-- Redis
-- AWS account (for S3)
-- Paddle account (for payments)
-- OpenAI API key (for TTS and summarization)
+1.  **Build and run the containers**:
 
-### Backend Setup
+    ```bash
+    docker-compose up --build
+    ```
 
-1. Install dependencies:
-```bash
-uv sync
-```
+2.  **Access the application**:
 
-2. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+    -   Frontend: [http://localhost:3000](http://localhost:3000)
+    -   Backend API: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-3. Set up database:
-```bash
-# Create database tables
-alembic upgrade head
-```
-
-4. Start the API server:
-```bash
-cd backend
-uvicorn main:app --reload
-```
-
-### Worker Setup
-
-1. Start Redis server:
-```bash
-redis-server
-```
-
-2. Start Celery worker:
-```bash
-cd worker
-celery -A celery_app worker --loglevel=info
-```
-
-### Frontend Setup
-
-1. Install dependencies:
-```bash
-cd frontend
-npm install
-```
-
-2. Set up environment variables:
-```bash
-cp .env.example .env.local
-# Edit with your Clerk and API configuration
-```
-
-3. Start development server:
-```bash
-npm run dev
-```
 
 ## API Endpoints
 

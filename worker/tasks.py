@@ -21,6 +21,11 @@ from .pdf_pipeline import PDFToAudioPipeline
 pipeline = PDFToAudioPipeline()
 
 
+from loguru import logger
+
+# ... (imports)
+
+
 @celery_app.task(bind=True)
 def process_pdf_task(self, job_id: int):
     """
@@ -29,25 +34,22 @@ def process_pdf_task(self, job_id: int):
     db = SessionLocal()
     storage_service = StorageService()
     job_service = JobService(db)
+    pdf_path = None
 
     try:
-        # Get job from database
+        logger.info(f"Starting PDF processing for job {job_id}")
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
             raise ValueError(f"Job {job_id} not found")
 
-        # Update job status to processing
         job_service.update_job_status(job_id, JobStatus.PROCESSING, 0)
 
-        # Download PDF from S3
         pdf_data = storage_service.download_file(job.pdf_s3_key)
 
-        # Create temporary files
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as pdf_file:
             pdf_file.write(pdf_data)
             pdf_path = pdf_file.name
 
-        # Process PDF
         audio_data = pipeline.process_pdf(
             pdf_path=pdf_path,
             voice_provider=job.voice_provider.value,
@@ -59,41 +61,40 @@ def process_pdf_task(self, job_id: int):
             ),
         )
 
-        # Upload audio to S3
         audio_key = f"audio/{job.user_id}/{job.id}.mp3"
         audio_url = storage_service.upload_file_data(
             audio_data, audio_key, "audio/mpeg"
         )
 
-        # Update job with completion
         job.audio_s3_key = audio_key
         job.audio_s3_url = audio_url
         job_service.update_job_status(job_id, JobStatus.COMPLETED, 100)
 
-        # Clean up temporary file
-        os.unlink(pdf_path)
-
+        logger.info(f"Successfully processed job {job_id}")
         return {"status": "completed", "job_id": job_id, "audio_url": audio_url}
 
+    except ValueError as e:
+        logger.warning(f"User error processing job {job_id}: {e}")
+        job_service.update_job_status(job_id, JobStatus.FAILED, error_message=str(e))
+        # Do not retry for user errors
+
     except Exception as e:
-        # Update job with error
-        error_message = str(e)
+        logger.error(f"System error processing job {job_id}: {e}", exc_info=True)
         job_service.update_job_status(
-            job_id, JobStatus.FAILED, error_message=error_message
+            job_id, JobStatus.FAILED, error_message="An unexpected error occurred."
         )
-
-        # Clean up temporary file if it exists
-        if "pdf_path" in locals():
-            try:
-                os.unlink(pdf_path)
-            except:
-                pass
-
-        # Re-raise exception for Celery to handle
+        # Retry for system errors
         raise self.retry(exc=e, countdown=60, max_retries=3)
 
     finally:
+        if pdf_path and os.path.exists(pdf_path):
+            os.unlink(pdf_path)
         db.close()
+
+
+from loguru import logger
+
+# ... (imports)
 
 
 @celery_app.task
@@ -102,9 +103,9 @@ def cleanup_old_files():
     Clean up old temporary files and completed jobs older than 30 days
     """
     db = SessionLocal()
+    logger.info("Starting cleanup of old files and jobs.")
 
     try:
-        # Find old completed jobs
         from datetime import datetime, timedelta
 
         cutoff_date = datetime.now() - timedelta(days=30)
@@ -115,23 +116,28 @@ def cleanup_old_files():
             .all()
         )
 
+        if not old_jobs:
+            logger.info("No old jobs to clean up.")
+            return "No old jobs to clean up."
+
         storage_service = StorageService()
 
         for job in old_jobs:
-            # Delete files from S3
+            logger.info(f"Deleting files for job {job.id}")
             if job.pdf_s3_key:
                 storage_service.delete_file(job.pdf_s3_key)
             if job.audio_s3_key:
                 storage_service.delete_file(job.audio_s3_key)
 
-            # Delete job record
             db.delete(job)
 
         db.commit()
+        logger.info(f"Cleaned up {len(old_jobs)} old jobs.")
         return f"Cleaned up {len(old_jobs)} old jobs"
 
     except Exception as e:
         db.rollback()
+        logger.error(f"Error during cleanup of old files: {e}", exc_info=True)
         raise e
 
     finally:
