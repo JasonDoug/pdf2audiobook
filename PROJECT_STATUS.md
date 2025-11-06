@@ -5,7 +5,7 @@
 | **Backend API** | ✅ Core structure | 80% | `backend/main.py`<br/>`backend/app/api/v1/`<br/>`backend/app/core/`<br/>`backend/app/services/` |
 | **Database Models** | ✅ Complete | 90% | `backend/app/models/__init__.py`<br/>`backend/app/schemas/__init__.py`<br/>`backend/app/core/database.py` |
 | **Task Queue** | ✅ Complete | 85% | `worker/celery_app.py`<br/>`worker/tasks.py`<br/>`pyproject.toml` (celery deps) |
-| **PDF Pipeline** | ✅ Complete | 85% | `worker/pdf_pipeline.py`<br/>`pyproject.toml` (OCR/TTS deps) |
+| **PDF Pipeline** | ✅ Complete | 95% | `worker/pdf_pipeline.py`<br/>`pyproject.toml` (OCR/TTS deps) |
 | **Authentication** | ⚠️ Partial | 30% | `backend/app/services/auth.py`<br/>`backend/app/api/v1/auth.py`<br/>`backend/app/core/config.py` |
 | **File Storage** | ⚠️ Code ready | 40% | `backend/app/services/storage.py`<br/>`backend/app/api/v1/jobs.py`<br/>`.env.example` |
 | **Payments** | ⚠️ Basic structure | 25% | `backend/app/services/payment.py`<br/>`backend/app/api/v1/payments.py`<br/>`backend/app/api/v1/webhooks.py` |
@@ -56,15 +56,24 @@ worker/
 pyproject.toml                        ✅ Celery dependencies
 ```
 
-### **PDF Pipeline (85% Complete)**
+### **PDF Pipeline (95% Complete)**
 ```
 worker/
-├── pdf_pipeline.py                   ✅ OCR + TTS pipeline
-├── tasks.py                          ✅ Pipeline integration
+├── pdf_pipeline.py                   ✅ Multi-provider TTS + intelligent OCR
+├── tasks.py                          ✅ Pipeline integration with voice provider
 └── celery_app.py                     ✅ Task configuration
 
-pyproject.toml                        ✅ pdf2image, pytesseract, openai, pydub
+pyproject.toml                        ✅ All TTS provider deps (OpenAI, Google, AWS, Azure, ElevenLabs)
 ```
+
+**Features Implemented:**
+- ✅ 5 TTS providers with unified interface
+- ✅ Intelligent text extraction (PyMuPDF + OCR fallback)
+- ✅ Advanced text cleanup and chapterization
+- ✅ AI-powered summary generation
+- ✅ Progress tracking with callbacks
+- ✅ Speed control per provider
+- ✅ Voice mapping for each provider
 
 ### **Authentication (30% Complete)**
 ```
@@ -210,10 +219,10 @@ Missing:
    vercel.json                        ❌ Frontend deployment
    ```
 
-## 📈 Overall Progress: ~45% Complete
+## 📈 Overall Progress: ~50% Complete
 
-**Backend Core:** 85% ✅  
-**External Integrations:** 35% ⚠️  
+**Backend Core:** 90% ✅  
+**External Integrations:** 40% ⚠️  
 **Frontend:** 0% ❌  
 **Deployment:** 0% ❌
 

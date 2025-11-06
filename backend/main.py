@@ -1,22 +1,28 @@
-import time
-import logging
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-
-from app.core.config import settings
-from app.core.database import SessionLocal, engine
-from app.api.v1 import auth, jobs, payments, webhooks
+from app.core.logging import setup_logging
+from loguru import logger
 
 # --- App Initialization ---
+setup_logging()
+
 app = FastAPI(
-    title="PDF2AudioBook API",
+    title=settings.PROJECT_NAME,
+    version=settings.PROJECT_VERSION,
     description="API for converting PDF documents to audiobooks.",
-    version="1.0.0"
 )
+
+# --- Middleware ---
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info(
+        f'"{request.method} {request.url.path}" {response.status_code} {process_time:.4f}s'
+    )
+    return response
+
 
 # --- Middleware ---
 
@@ -37,17 +43,6 @@ app.add_middleware(
 # GZip Compression
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Request Logging
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    logging.info(
-        f"'{request.method} {request.url.path}' {response.status_code} {process_time:.4f}s"
-    )
-    return response
-
 # --- API Routers ---
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
@@ -57,21 +52,68 @@ app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"]
 
 # --- Health Check & Root Endpoint ---
 
+
 @app.get("/health", tags=["System"])
 async def health_check():
     """
+
     Performs a health check on the API and its dependencies.
+
     """
+
+    db_status = "unhealthy"
+
+    redis_status = "unhealthy"
+
+    s3_status = "unhealthy"
+
     try:
         db = SessionLocal()
+
         try:
             db.execute("SELECT 1")
+
             db_status = "healthy"
+
         finally:
             db.close()
+
     except Exception:
-            db_status = "unhealthy"
-    return {"status": "healthy", "dependencies": {"database": db_status}}
+        pass
+
+    try:
+        redis_client = redis.from_url(settings.REDIS_URL)
+
+        if redis_client.ping():
+            redis_status = "healthy"
+
+    except Exception:
+        pass
+
+    try:
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_REGION,
+        )
+
+        s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
+
+        s3_status = "healthy"
+
+    except Exception:
+        pass
+
+    return {
+        "status": "healthy",
+        "dependencies": {
+            "database": db_status,
+            "redis": redis_status,
+            "s3": s3_status,
+        },
+    }
+
 
 @app.get("/", tags=["System"])
 def read_root():

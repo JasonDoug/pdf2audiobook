@@ -7,8 +7,8 @@
 
 # --- Service Account Keys ---
 # Ignore common names for service account key files (e.g., Google Cloud JSON keys)
-*.json
-!*.json.example
+service-account.json
+keys.json
 
 # --- Python ---
 # Byte-compiled / optimized / C extensions
@@ -58,3 +58,4 @@ test.db
 # --- OS-specific ---
 .DS_Store
 Thumbs.db
+pdf2audiobook_variables.txt
