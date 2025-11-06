@@ -196,8 +196,12 @@ async def health_check():
         redis_status = "unhealthy"
 
     # Security: Only test S3 connectivity if credentials are configured
-    logger.info(f"S3 check: AWS_ACCESS_KEY_ID set: {bool(settings.AWS_ACCESS_KEY_ID)}, AWS_SECRET_ACCESS_KEY set: {bool(settings.AWS_SECRET_ACCESS_KEY)}, S3_BUCKET_NAME set: {bool(settings.S3_BUCKET_NAME)}")
-    if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY and settings.S3_BUCKET_NAME:
+    logger.info(f"S3 check: AWS_ACCESS_KEY_ID='{settings.AWS_ACCESS_KEY_ID}', AWS_SECRET_ACCESS_KEY='{'***' if settings.AWS_SECRET_ACCESS_KEY else None}', S3_BUCKET_NAME='{settings.S3_BUCKET_NAME}', AWS_REGION='{settings.AWS_REGION}'")
+    aws_key_set = bool(settings.AWS_ACCESS_KEY_ID)
+    aws_secret_set = bool(settings.AWS_SECRET_ACCESS_KEY)
+    bucket_set = bool(settings.S3_BUCKET_NAME)
+    logger.info(f"S3 check booleans: key={aws_key_set}, secret={aws_secret_set}, bucket={bucket_set}")
+    if aws_key_set and aws_secret_set and bucket_set:
         logger.info(f"S3 credentials configured, testing connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
         try:
             s3_client = boto3.client(
