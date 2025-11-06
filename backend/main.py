@@ -203,7 +203,7 @@ async def health_check():
             s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
             s3_status = "healthy"
         except Exception:
-            pass
+            s3_status = "unhealthy"
     else:
         s3_status = "not_configured"
 
