@@ -1,0 +1,16 @@
+# Railway Deployment Configuration
+
+# This file tells Railway how to deploy the FastAPI backend
+
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT --workers 4"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Environment variables will be set in Railway dashboard
+# Required: DATABASE_URL, REDIS_URL, SECRET_KEY, CLERK_PEM_PUBLIC_KEY, etc.
