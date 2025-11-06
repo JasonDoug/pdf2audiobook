@@ -148,15 +148,14 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # --- API Routers ---
 
-# Temporarily disabled to debug startup issues
-# try:
-#     app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-#     app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
-#     app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
-#     app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
-# except Exception as e:
-#     logger.error(f"Failed to include routers: {e}")
-#     # Continue without routers if they fail to import
+try:
+    app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+    app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
+    app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
+    app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
+except Exception as e:
+    logger.error(f"Failed to include routers: {e}")
+    # Continue without routers if they fail to import
 
 # --- Health Check & Root Endpoint ---
 
