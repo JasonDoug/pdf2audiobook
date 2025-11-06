@@ -211,23 +211,31 @@ async def health_check():
                 region_name=settings.AWS_REGION,
             )
             logger.info("S3 client created successfully")
-            # Try head_bucket first, fallback to list_buckets if permissions don't allow
+            # Try head_bucket to check if bucket exists and is accessible
             try:
                 logger.info(f"Attempting head_bucket on {settings.S3_BUCKET_NAME}")
                 result = s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
                 logger.info(f"S3 head_bucket successful for bucket: {settings.S3_BUCKET_NAME}")
                 s3_status = "healthy"
             except Exception as head_error:
-                logger.warning(f"S3 head_bucket failed: {head_error}, trying list_buckets")
-                try:
-                    # Fallback: try to list buckets to verify credentials work
-                    logger.info("Attempting list_buckets")
-                    buckets = s3_client.list_buckets()
-                    logger.info(f"S3 credentials work, can list {len(buckets.get('Buckets', []))} buckets")
-                    s3_status = "healthy"
-                except Exception as list_error:
-                    logger.error(f"S3 list_buckets also failed: {list_error}")
+                error_str = str(head_error)
+                if "404" in error_str or "Not Found" in error_str:
+                    logger.error(f"S3 bucket '{settings.S3_BUCKET_NAME}' does not exist in region '{settings.AWS_REGION}'")
                     s3_status = "unhealthy"
+                elif "AccessDenied" in error_str or "Forbidden" in error_str:
+                    logger.error(f"S3 access denied to bucket '{settings.S3_BUCKET_NAME}' - check IAM permissions")
+                    s3_status = "unhealthy"
+                else:
+                    logger.warning(f"S3 head_bucket failed with unexpected error: {head_error}, trying get_bucket_location")
+                    try:
+                        # Fallback: try to get bucket location to verify credentials work
+                        logger.info("Attempting get_bucket_location")
+                        location = s3_client.get_bucket_location(Bucket=settings.S3_BUCKET_NAME)
+                        logger.info(f"S3 credentials work, bucket exists in region: {location.get('LocationConstraint', 'us-east-1')}")
+                        s3_status = "healthy"
+                    except Exception as location_error:
+                        logger.error(f"S3 get_bucket_location also failed: {location_error}")
+                        s3_status = "unhealthy"
         except Exception as e:
             logger.error(f"S3 client creation/health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
             s3_status = "unhealthy"
