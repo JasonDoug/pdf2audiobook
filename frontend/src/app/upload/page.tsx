@@ -1,85 +1,90 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, X, CheckCircle, AlertCircle } from 'lucide-react';
-import { apiClient } from '../../lib/api';
-import toast, { Toaster } from 'react-hot-toast';
-
-interface JobResponse {
-  id: number;
-  status: string;
-  message: string;
-}
+import { useState } from 'react'
+import { useDropzone } from 'react-dropzone'
+import { Upload, FileText, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { createJob } from '../../lib/api'
+import { Job } from '../../lib/types'
+import toast, { Toaster } from 'react-hot-toast'
+import { useAuth } from '@clerk/nextjs'
 
 export default function UploadPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [jobResponse, setJobResponse] = useState<JobResponse | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [jobResponse, setJobResponse] = useState<Job | null>(null)
+  const { getToken } = useAuth()
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'application/pdf': ['.pdf']
+      'application/pdf': ['.pdf'],
     },
     maxFiles: 1,
     maxSize: 50 * 1024 * 1024, // 50MB
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        setSelectedFile(acceptedFiles[0]);
-        setJobResponse(null);
+        setSelectedFile(acceptedFiles[0])
+        setJobResponse(null)
       }
-    }
-  });
+    },
+  })
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) return
 
-    setIsUploading(true);
-    setUploadProgress(0);
+    setIsUploading(true)
+    setUploadProgress(0)
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('voice_provider', 'openai');
-      formData.append('voice', 'alloy');
-      formData.append('reading_speed', '1.0');
-      formData.append('include_summary', 'true');
+      const token = await getToken()
+      if (!token) {
+        throw new Error('You must be signed in to upload a file.')
+      }
+
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      formData.append('voice_provider', 'openai')
+      formData.append('voice_type', 'alloy')
+      formData.append('reading_speed', '1.0')
+      formData.append('include_summary', 'true')
 
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
+        setUploadProgress((prev) => Math.min(prev + 10, 90))
+      }, 200)
 
-      const response = await apiClient.createJob(formData);
+      const response = await createJob(formData, token)
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-      setJobResponse(response);
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+      setJobResponse(response)
 
-      toast.success('PDF uploaded successfully! Processing will begin shortly.');
+      toast.success('PDF uploaded successfully! Processing will begin shortly.')
 
       // Reset after success
       setTimeout(() => {
-        setSelectedFile(null);
-        setUploadProgress(0);
-        setJobResponse(null);
-      }, 3000);
-
+        setSelectedFile(null)
+        setUploadProgress(0)
+        setJobResponse(null)
+      }, 3000)
     } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Upload failed. Please try again.');
-      setUploadProgress(0);
+      console.error('Upload failed:', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Upload failed. Please try again.'
+      )
+      setUploadProgress(0)
     } finally {
-      setIsUploading(false);
+      setIsUploading(false)
     }
-  };
+  }
 
   const removeFile = () => {
-    setSelectedFile(null);
-    setJobResponse(null);
-    setUploadProgress(0);
-  };
+    setSelectedFile(null)
+    setJobResponse(null)
+    setUploadProgress(0)
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -102,8 +107,8 @@ export default function UploadPage() {
             isDragActive
               ? 'border-blue-400 bg-blue-50'
               : selectedFile
-              ? 'border-green-400 bg-green-50'
-              : 'border-gray-300 hover:border-gray-400'
+                ? 'border-green-400 bg-green-50'
+                : 'border-gray-300 hover:border-gray-400'
           }`}
         >
           <input {...getInputProps()} />
@@ -113,15 +118,17 @@ export default function UploadPage() {
               <div className="flex items-center justify-center space-x-3">
                 <FileText className="h-12 w-12 text-green-600" />
                 <div className="text-left">
-                  <p className="text-lg font-medium text-gray-900">{selectedFile.name}</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {selectedFile.name}
+                  </p>
                   <p className="text-sm text-gray-500">
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile();
+                    e.stopPropagation()
+                    removeFile()
                   }}
                   className="p-1 hover:bg-gray-200 rounded"
                 >
@@ -150,7 +157,9 @@ export default function UploadPage() {
               <Upload className="h-16 w-16 text-gray-400 mx-auto" />
               <div>
                 <p className="text-xl font-medium text-gray-900">
-                  {isDragActive ? 'Drop your PDF here' : 'Drag & drop your PDF here'}
+                  {isDragActive
+                    ? 'Drop your PDF here'
+                    : 'Drag & drop your PDF here'}
                 </p>
                 <p className="text-gray-500 mt-2">or click to browse files</p>
               </div>
@@ -207,10 +216,13 @@ export default function UploadPage() {
         <div className="mt-8 text-center text-sm text-gray-500">
           <div className="flex items-center justify-center space-x-1">
             <AlertCircle className="h-4 w-4" />
-            <span>Having trouble? Make sure you're signed in and your file is under 50MB.</span>
+            <span>
+              Having trouble? Make sure you're signed in and your file is under
+              50MB.
+            </span>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

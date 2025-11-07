@@ -1,0 +1,3 @@
+module.exports=[85568,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(52462);a.n(d("[project]/Projects/Clones/pdf2audiobook/frontend/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},23378,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(52462);a.n(d("[project]/Projects/Clones/pdf2audiobook/frontend/node_modules/next/dist/client/components/builtin/global-error.js"))},29464,a=>{"use strict";a.i(85568);var b=a.i(23378);a.n(b)}];
+
+//# sourceMappingURL=bc847_next_dist_client_components_builtin_global-error_0083df01.js.map

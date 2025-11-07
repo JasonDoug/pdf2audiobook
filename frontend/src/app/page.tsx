@@ -1,5 +1,7 @@
-import Link from 'next/link';
-import { FileText, Upload, Play, CheckCircle, Users, Zap } from 'lucide-react';
+import Link from 'next/link'
+import { FileText, Upload, Play, CheckCircle, Users, Zap } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default function Home() {
   return (
@@ -13,8 +15,9 @@ export default function Home() {
               <span className="text-blue-600 block">Audiobooks</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Convert your PDF documents to high-quality audiobooks using advanced AI technology.
-              Listen to your favorite books, articles, and documents anywhere, anytime.
+              Convert your PDF documents to high-quality audiobooks using
+              advanced AI technology. Listen to your favorite books, articles,
+              and documents anywhere, anytime.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -43,7 +46,8 @@ export default function Home() {
               Why Choose PDF2AudioBook?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Experience the future of document consumption with our cutting-edge features.
+              Experience the future of document consumption with our
+              cutting-edge features.
             </p>
           </div>
 
@@ -52,9 +56,12 @@ export default function Home() {
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Lightning Fast
+              </h3>
               <p className="text-gray-600">
-                Convert your PDFs to audiobooks in minutes with our optimized processing pipeline.
+                Convert your PDFs to audiobooks in minutes with our optimized
+                processing pipeline.
               </p>
             </div>
 
@@ -62,9 +69,12 @@ export default function Home() {
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">High Quality</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                High Quality
+              </h3>
               <p className="text-gray-600">
-                Professional-grade text-to-speech with multiple voice options and natural intonation.
+                Professional-grade text-to-speech with multiple voice options
+                and natural intonation.
               </p>
             </div>
 
@@ -72,9 +82,12 @@ export default function Home() {
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy to Use</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Easy to Use
+              </h3>
               <p className="text-gray-600">
-                Simple drag-and-drop interface with real-time progress tracking and instant downloads.
+                Simple drag-and-drop interface with real-time progress tracking
+                and instant downloads.
               </p>
             </div>
           </div>
@@ -88,7 +101,8 @@ export default function Home() {
             Ready to Start Listening?
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join thousands of users who have transformed their reading experience.
+            Join thousands of users who have transformed their reading
+            experience.
           </p>
           <Link
             href="/upload"
@@ -100,5 +114,5 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
+  )
 }

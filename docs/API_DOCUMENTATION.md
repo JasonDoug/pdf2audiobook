@@ -4,7 +4,7 @@
 
 The PDF2Audiobook API provides a comprehensive REST interface for converting PDF documents to high-quality audiobooks. The API supports multiple TTS providers, real-time progress tracking, and secure file management.
 
-**Base URL:** `https://api.pdf2audiobook.com` (production) or `http://localhost:8000` (development)
+**Base URL:** `https://pdf2audiobook.onrender.com` (production) or `http://localhost:8000` (development)
 
 **Version:** v1
 
@@ -83,7 +83,7 @@ Verify a Clerk JWT token and sync user data.
 
 **Request:**
 ```bash
-curl -X POST "https://api.pdf2audiobook.com/api/v1/auth/verify" \
+curl -X POST "https://pdf2audiobook.onrender.com/api/v1/auth/verify" \
   -H "Authorization: Bearer <jwt-token>"
 ```
 

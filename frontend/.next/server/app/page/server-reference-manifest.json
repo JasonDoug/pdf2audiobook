@@ -1,0 +1,50 @@
+{
+  "node": {
+    "7f3dc1b02f4217fc3628af46c95a2c181883d08fd5": {
+      "workers": {
+        "app/page": {
+          "moduleId": 1098,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "detectKeylessEnvDriftAction",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "7fb0ea7d90835c01a996ae9d8b6add6e061e7cd72c": {
+      "workers": {
+        "app/page": {
+          "moduleId": 1098,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "invalidateCacheAction",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+    },
+    "7f7353f39012925c6ab531077c25e58237a1a0690c": {
+      "workers": {
+        "app/page": {
+          "moduleId": 1098,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "createOrReadKeylessAction",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    }
+  },
+  "edge": {}
+}
