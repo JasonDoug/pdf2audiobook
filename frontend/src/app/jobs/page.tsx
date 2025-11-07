@@ -6,6 +6,10 @@ import { Job } from '../../lib/types'
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
 
+const hasClerkKey =
+  typeof process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === 'string' &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_')
+
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -14,10 +18,17 @@ export default function JobsPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const token = await getToken()
-        if (!token) {
+        if (!hasClerkKey) {
+          setIsLoading(false)
           return
         }
+
+        const token = await getToken()
+        if (!token) {
+          setIsLoading(false)
+          return
+        }
+
         const fetchedJobs = await getJobs(token)
         setJobs(fetchedJobs)
       } catch (error) {
@@ -29,6 +40,21 @@ export default function JobsPage() {
 
     fetchJobs()
   }, [getToken])
+
+  if (!hasClerkKey) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          My Jobs
+        </h1>
+        <p className="text-sm text-gray-600">
+          Clerk is not configured in this environment, so job history cannot be
+          loaded. In production, this page will show your PDF-to-audiobook
+          conversions.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

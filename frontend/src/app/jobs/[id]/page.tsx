@@ -1,4 +1,3 @@
-pdf2audiobook/frontend/src/app/jobs/[id]/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -26,7 +25,13 @@ export default function JobDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const jobId = Number(params?.id)
+  const jobIdParam = params?.id
+  const jobId =
+    typeof jobIdParam === 'string'
+      ? Number(jobIdParam)
+      : Array.isArray(jobIdParam)
+        ? Number(jobIdParam[0])
+        : NaN
 
   useEffect(() => {
     if (!jobId || Number.isNaN(jobId)) {
@@ -139,9 +144,7 @@ export default function JobDetailPage() {
       case JobStatus.PENDING:
       default:
         return (
-          <span className={`${base} bg-amber-50 text-amber-700`}>
-            Queued
-          </span>
+          <span className={`${base} bg-amber-50 text-amber-700`}>Queued</span>
         )
     }
   }
@@ -169,9 +172,7 @@ export default function JobDetailPage() {
             </p>
           </div>
         </div>
-        <div className="mt-6">
-          {/* Keep layout stable when signed out */}
-        </div>
+        <div className="mt-6" />
       </SignedOut>
 
       <SignedIn>
@@ -254,9 +255,7 @@ export default function JobDetailPage() {
                 <div className="mt-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 text-[10px] sm:text-xs text-rose-800 flex gap-2">
                   <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-medium mb-0.5">
-                      Conversion failed
-                    </div>
+                    <div className="font-medium mb-0.5">Conversion failed</div>
                     <div>{job.error_message}</div>
                   </div>
                 </div>
@@ -326,10 +325,7 @@ export default function JobDetailPage() {
                   <div>
                     If this is a scanned or very large PDF, try again with a
                     clearer copy or contact support with this job ID:{' '}
-                    <span className="font-mono text-rose-700">
-                      {job.id}
-                    </span>
-                    .
+                    <span className="font-mono text-rose-700">{job.id}</span>.
                   </div>
                 </div>
               )}

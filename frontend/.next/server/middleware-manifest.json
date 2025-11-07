@@ -1,6 +1,39 @@
 {
   "version": 3,
-  "middleware": {},
-  "sortedMiddleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/Projects_Clones_pdf2audiobook_frontend_eac3d472._.js",
+        "server/edge/chunks/bc847_next_dist_esm_api_headers_18ffdc7a.js",
+        "server/edge/chunks/bc847_next_dist_5cc4c353._.js",
+        "server/edge/chunks/[root-of-the-server]__d15f6434._.js",
+        "server/edge/chunks/turbopack-Projects_Clones_pdf2audiobook_frontend_edge-wrapper_5a0dd120.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*))(\\\\.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)"
+        },
+        {
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/(api|trpc))(.*)(\\\\.json)?[\\/#\\?]?$",
+          "originalSource": "/(api|trpc)(.*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "ExmFeWr9v3nsj5EuhQkNB",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "Gq4yd7XsgqMo4SAavw1kEFnkoanWDYNn2eyZaEL3eMc=",
+        "__NEXT_PREVIEW_MODE_ID": "b79ad3ff61456290fc658d5c2d7b297b",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "a3ed5ee2a808ea3ac6367319b3fe1cd5f57bdf8095497d62aaa78c4a673834a8",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "98a4d2f4e66b152f2191a2d8cd067ced6eac9b39fa747e3d668b30bc012236e1"
+      }
+    }
+  },
+  "sortedMiddleware": [
+    "/"
+  ],
   "functions": {}
 }

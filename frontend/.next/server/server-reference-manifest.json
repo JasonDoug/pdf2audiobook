@@ -3,63 +3,70 @@
     "7f3dc1b02f4217fc3628af46c95a2c181883d08fd5": {
       "workers": {
         "app/_not-found/page": {
-          "moduleId": 44720,
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/jobs/page": {
-          "moduleId": 32750,
+          "moduleId": 28445,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/page": {
-          "moduleId": 1098,
+          "moduleId": 69241,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/pricing/page": {
-          "moduleId": 98908,
+          "moduleId": 96734,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/sign-in/[[...sign-in]]/page": {
-          "moduleId": 94984,
+          "moduleId": 66525,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/sign-up/[[...sign-up]]/page": {
-          "moduleId": 23424,
+          "moduleId": 1792,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/upload/page": {
-          "moduleId": 46137,
+          "moduleId": 86903,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         }
       },
       "layer": {
-        "app/_not-found/page": "action-browser",
-        "app/jobs/[jobId]/page": "action-browser",
-        "app/jobs/page": "action-browser",
-        "app/page": "action-browser",
-        "app/pricing/page": "action-browser",
-        "app/sign-in/[[...sign-in]]/page": "action-browser",
-        "app/sign-up/[[...sign-up]]/page": "action-browser",
-        "app/upload/page": "action-browser"
+        "app/_not-found/page": "rsc",
+        "app/jobs/[id]/page": "rsc",
+        "app/jobs/[jobId]/page": "rsc",
+        "app/jobs/page": "rsc",
+        "app/page": "rsc",
+        "app/pricing/page": "rsc",
+        "app/sign-in/[[...sign-in]]/page": "rsc",
+        "app/sign-up/[[...sign-up]]/page": "rsc",
+        "app/upload/page": "rsc"
       },
       "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js",
       "exportedName": "detectKeylessEnvDriftAction"
@@ -67,49 +74,55 @@
     "7fb0ea7d90835c01a996ae9d8b6add6e061e7cd72c": {
       "workers": {
         "app/_not-found/page": {
-          "moduleId": 44720,
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/jobs/page": {
-          "moduleId": 32750,
+          "moduleId": 28445,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/page": {
-          "moduleId": 1098,
+          "moduleId": 69241,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/pricing/page": {
-          "moduleId": 98908,
+          "moduleId": 96734,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/sign-in/[[...sign-in]]/page": {
-          "moduleId": 94984,
+          "moduleId": 66525,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/sign-up/[[...sign-up]]/page": {
-          "moduleId": 23424,
+          "moduleId": 1792,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
         "app/upload/page": {
-          "moduleId": 46137,
+          "moduleId": 86903,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
@@ -117,6 +130,7 @@
       },
       "layer": {
         "app/_not-found/page": "action-browser",
+        "app/jobs/[id]/page": "action-browser",
         "app/jobs/[jobId]/page": "action-browser",
         "app/jobs/page": "action-browser",
         "app/page": "action-browser",
@@ -131,56 +145,276 @@
     "7f7353f39012925c6ab531077c25e58237a1a0690c": {
       "workers": {
         "app/_not-found/page": {
-          "moduleId": 44720,
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/jobs/page": {
-          "moduleId": 32750,
+          "moduleId": 28445,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/page": {
-          "moduleId": 1098,
+          "moduleId": 69241,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/pricing/page": {
-          "moduleId": 98908,
+          "moduleId": 96734,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/sign-in/[[...sign-in]]/page": {
-          "moduleId": 94984,
+          "moduleId": 66525,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/sign-up/[[...sign-up]]/page": {
-          "moduleId": 23424,
+          "moduleId": 1792,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
         "app/upload/page": {
-          "moduleId": 46137,
+          "moduleId": 86903,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         }
       },
       "layer": {
+        "app/_not-found/page": "rsc",
+        "app/jobs/[id]/page": "rsc",
+        "app/jobs/[jobId]/page": "rsc",
+        "app/jobs/page": "rsc",
+        "app/page": "rsc",
+        "app/pricing/page": "rsc",
+        "app/sign-in/[[...sign-in]]/page": "rsc",
+        "app/sign-up/[[...sign-up]]/page": "rsc",
+        "app/upload/page": "rsc"
+      },
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js",
+      "exportedName": "createOrReadKeylessAction"
+    },
+    "7f33195706c8838162bc349d79d9bd7ec9a8cf6fa6": {
+      "workers": {
+        "app/_not-found/page": {
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/page": {
+          "moduleId": 28445,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/page": {
+          "moduleId": 69241,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/pricing/page": {
+          "moduleId": 96734,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/sign-in/[[...sign-in]]/page": {
+          "moduleId": 66525,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/sign-up/[[...sign-up]]/page": {
+          "moduleId": 1792,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/upload/page": {
+          "moduleId": 86903,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/_not-found/page": "rsc",
+        "app/jobs/[id]/page": "rsc",
+        "app/jobs/[jobId]/page": "rsc",
+        "app/jobs/page": "rsc",
+        "app/page": "rsc",
+        "app/pricing/page": "rsc",
+        "app/sign-in/[[...sign-in]]/page": "rsc",
+        "app/sign-up/[[...sign-up]]/page": "rsc",
+        "app/upload/page": "rsc"
+      },
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js",
+      "exportedName": "formatMetadataHeaders"
+    },
+    "7f83794ee45911ac1a804a530cd482b3123a9bb7ef": {
+      "workers": {
+        "app/_not-found/page": {
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/jobs/page": {
+          "moduleId": 28445,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/page": {
+          "moduleId": 69241,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/pricing/page": {
+          "moduleId": 96734,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/sign-in/[[...sign-in]]/page": {
+          "moduleId": 66525,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/sign-up/[[...sign-up]]/page": {
+          "moduleId": 1792,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        },
+        "app/upload/page": {
+          "moduleId": 86903,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/_not-found/page": "rsc",
+        "app/jobs/[id]/page": "rsc",
+        "app/jobs/[jobId]/page": "rsc",
+        "app/jobs/page": "rsc",
+        "app/page": "rsc",
+        "app/pricing/page": "rsc",
+        "app/sign-in/[[...sign-in]]/page": "rsc",
+        "app/sign-up/[[...sign-up]]/page": "rsc",
+        "app/upload/page": "rsc"
+      },
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js",
+      "exportedName": "collectKeylessMetadata"
+    },
+    "7f11d20c11b7a5f89c30357c0e695eedd001abe128": {
+      "workers": {
+        "app/_not-found/page": {
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/page": {
+          "moduleId": 28445,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/page": {
+          "moduleId": 69241,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/pricing/page": {
+          "moduleId": 96734,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/sign-in/[[...sign-in]]/page": {
+          "moduleId": 66525,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/sign-up/[[...sign-up]]/page": {
+          "moduleId": 1792,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/upload/page": {
+          "moduleId": 86903,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
         "app/_not-found/page": "action-browser",
+        "app/jobs/[id]/page": "action-browser",
         "app/jobs/[jobId]/page": "action-browser",
         "app/jobs/page": "action-browser",
         "app/page": "action-browser",
@@ -190,7 +424,78 @@
         "app/upload/page": "action-browser"
       },
       "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js",
-      "exportedName": "createOrReadKeylessAction"
+      "exportedName": "syncKeylessConfigAction"
+    },
+    "7f337c097362b01e2456b2da6009e840e5f9ec12f1": {
+      "workers": {
+        "app/_not-found/page": {
+          "moduleId": 21542,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[id]/page": {
+          "moduleId": 79280,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/jobs/page": {
+          "moduleId": 28445,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/page": {
+          "moduleId": 69241,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/pricing/page": {
+          "moduleId": 96734,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/sign-in/[[...sign-in]]/page": {
+          "moduleId": 66525,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/sign-up/[[...sign-up]]/page": {
+          "moduleId": 1792,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/upload/page": {
+          "moduleId": 86903,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/_not-found/page": "action-browser",
+        "app/jobs/[id]/page": "action-browser",
+        "app/jobs/[jobId]/page": "action-browser",
+        "app/jobs/page": "action-browser",
+        "app/page": "action-browser",
+        "app/pricing/page": "action-browser",
+        "app/sign-in/[[...sign-in]]/page": "action-browser",
+        "app/sign-up/[[...sign-up]]/page": "action-browser",
+        "app/upload/page": "action-browser"
+      },
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js",
+      "exportedName": "deleteKeylessAction"
     }
   },
   "edge": {},

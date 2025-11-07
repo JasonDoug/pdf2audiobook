@@ -5,12 +5,6 @@ const nextConfig = {
     // Enable if using app directory features
   },
 
-  // Environment variables that should be available at build time
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-  },
-
   // Image optimization settings
   images: {
     domains: ['localhost'], // Add your production domain here
@@ -37,15 +31,15 @@ const nextConfig = {
           },
         ],
       },
-    ];
+    ]
   },
 
   // Redirects and rewrites if needed
   async rewrites() {
     return [
       // Add any API rewrites if needed for local development
-    ];
+    ]
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

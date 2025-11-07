@@ -3,14 +3,14 @@
     "7f3dc1b02f4217fc3628af46c95a2c181883d08fd5": {
       "workers": {
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         }
       },
       "layer": {
-        "app/jobs/[jobId]/page": "action-browser"
+        "app/jobs/[jobId]/page": "rsc"
       },
       "exportedName": "detectKeylessEnvDriftAction",
       "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
@@ -18,7 +18,7 @@
     "7fb0ea7d90835c01a996ae9d8b6add6e061e7cd72c": {
       "workers": {
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
@@ -33,16 +33,76 @@
     "7f7353f39012925c6ab531077c25e58237a1a0690c": {
       "workers": {
         "app/jobs/[jobId]/page": {
-          "moduleId": 66682,
+          "moduleId": 30451,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         }
       },
       "layer": {
-        "app/jobs/[jobId]/page": "action-browser"
+        "app/jobs/[jobId]/page": "rsc"
       },
       "exportedName": "createOrReadKeylessAction",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "7f33195706c8838162bc349d79d9bd7ec9a8cf6fa6": {
+      "workers": {
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/jobs/[jobId]/page": "rsc"
+      },
+      "exportedName": "formatMetadataHeaders",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+    },
+    "7f83794ee45911ac1a804a530cd482b3123a9bb7ef": {
+      "workers": {
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/jobs/[jobId]/page": "rsc"
+      },
+      "exportedName": "collectKeylessMetadata",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+    },
+    "7f11d20c11b7a5f89c30357c0e695eedd001abe128": {
+      "workers": {
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/jobs/[jobId]/page": "action-browser"
+      },
+      "exportedName": "syncKeylessConfigAction",
+      "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "7f337c097362b01e2456b2da6009e840e5f9ec12f1": {
+      "workers": {
+        "app/jobs/[jobId]/page": {
+          "moduleId": 30451,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/jobs/[jobId]/page": "action-browser"
+      },
+      "exportedName": "deleteKeylessAction",
       "filename": "Projects/Clones/pdf2audiobook/frontend/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
     }
   },

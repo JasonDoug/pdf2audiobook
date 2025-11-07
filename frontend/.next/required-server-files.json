@@ -1,9 +1,7 @@
 {
   "version": 1,
   "config": {
-    "env": {
-      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-    },
+    "env": {},
     "webpack": null,
     "typescript": {
       "ignoreBuildErrors": false

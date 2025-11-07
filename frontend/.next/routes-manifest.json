@@ -40,6 +40,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/jobs/[id]",
+      "regex": "^/jobs/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/jobs/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/jobs/[jobId]",
       "regex": "^/jobs/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -70,6 +78,12 @@
       "regex": "^/(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
     },
     {
       "page": "/_not-found",
