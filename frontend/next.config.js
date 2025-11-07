@@ -40,6 +40,34 @@ const nextConfig = {
       // Add any API rewrites if needed for local development
     ]
   },
+
+  // Reduce dev-time memory usage by avoiding watching heavy root-level folders
+  // and backend-related artifacts that are irrelevant to the Next.js app.
+  webpackDevMiddleware: (config) => {
+    if (config.watchOptions && !config.watchOptions.ignored) {
+      config.watchOptions.ignored = []
+    }
+
+    const ignored = config.watchOptions?.ignored || []
+
+    const heavyGlobs = [
+      '../backend/**',
+      '../worker/**',
+      '../logs/**',
+      '../.venv/**',
+      '../venv/**',
+      '../dev.db',
+      '../test.db',
+      '../output.mp3',
+      '../server.log',
+    ]
+
+    config.watchOptions.ignored = Array.isArray(ignored)
+      ? [...ignored, ...heavyGlobs]
+      : [ignored, ...heavyGlobs]
+
+    return config
+  },
 }
 
 module.exports = nextConfig
