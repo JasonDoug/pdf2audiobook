@@ -1,20 +1,25 @@
 import time
-from fastapi import FastAPI, Request, HTTPException
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+
+import boto3
+import redis
+from app.api.v1 import auth, jobs, payments, webhooks
+from app.core.config import settings
+from app.core.database import SessionLocal, get_db
+from app.core.exceptions import (
+    AppException,
+    app_exception_handler,
+    general_exception_handler,
+    http_exception_handler,
+)
+from app.core.logging import setup_logging
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-import redis
-import boto3
-from sqlalchemy import text
-from app.core.database import SessionLocal, get_db
-
-from app.core.logging import setup_logging
-from app.core.config import settings
-from app.api.v1 import auth, jobs, payments, webhooks
 from loguru import logger
-from app.core.exceptions import http_exception_handler, general_exception_handler, app_exception_handler, AppException
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from sqlalchemy import text
 
 # --- App Initialization ---
 setup_logging()
@@ -23,10 +28,16 @@ setup_logging()
 try:
     if settings.is_production:
         # Only validate if we have the basic required settings
-        if hasattr(settings, 'SECRET_KEY') and settings.SECRET_KEY and not settings.SECRET_KEY == "dev-secret-key-change-in-production":
+        if (
+            hasattr(settings, "SECRET_KEY")
+            and settings.SECRET_KEY
+            and not settings.SECRET_KEY == "dev-secret-key-change-in-production"
+        ):
             settings.validate_production_settings()
         else:
-            logger.warning("Production environment detected but SECRET_KEY not properly configured. Skipping validation.")
+            logger.warning(
+                "Production environment detected but SECRET_KEY not properly configured. Skipping validation."
+            )
 except (ValueError, AttributeError) as e:
     logger.error(f"Configuration validation failed: {e}")
     # Don't raise in build time, just log
@@ -94,7 +105,9 @@ async def security_headers(request: Request, call_next):
 
     # HSTS (HTTP Strict Transport Security) - only in production
     if not settings.DEBUG:
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
 
     return response
 
@@ -119,22 +132,45 @@ app.state.limiter = limiter
 # app.state.limiter = limiter
 # app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
 # CORS - Environment-aware configuration
-allowed_origins = settings.ALLOWED_HOSTS
-if not allowed_origins:
+# Precedence:
+# 1. CORS_ALLOW_ORIGINS (comma-separated)
+# 2. ALLOWED_HOSTS (legacy, comma-separated)
+# 3. Safe defaults in development; explicit-only in production.
+def _parse_csv_env(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+cors_from_env = _parse_csv_env(getattr(settings, "CORS_ALLOW_ORIGINS", None))
+hosts_from_env = _parse_csv_env(getattr(settings, "ALLOWED_HOSTS", None))
+
+if cors_from_env:
+    allowed_origins = cors_from_env
+elif hosts_from_env:
+    allowed_origins = hosts_from_env
+else:
     if settings.is_production:
-        # In production, require explicit configuration
+        # In production, require explicit configuration; empty list means CORS disabled.
         allowed_origins = []
     else:
         # Development defaults
-        allowed_origins = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"]
+        allowed_origins = [
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3000",
+        ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "User-Agent"],
+    allow_methods=[
+        "*"
+    ],  # Allow all methods; browser + route handlers will enforce specifics.
+    allow_headers=["*"],  # Allow all headers, including Authorization & custom ones.
 )
 
 # GZip Compression
@@ -196,13 +232,19 @@ async def health_check():
         redis_status = "unhealthy"
 
     # Security: Only test S3 connectivity if credentials are configured
-    logger.info(f"S3 check: AWS_ACCESS_KEY_ID='{settings.AWS_ACCESS_KEY_ID}', AWS_SECRET_ACCESS_KEY='{'***' if settings.AWS_SECRET_ACCESS_KEY else None}', S3_BUCKET_NAME='{settings.S3_BUCKET_NAME}', AWS_REGION='{settings.AWS_REGION}'")
+    logger.info(
+        f"S3 check: AWS_ACCESS_KEY_ID='{settings.AWS_ACCESS_KEY_ID}', AWS_SECRET_ACCESS_KEY='{'***' if settings.AWS_SECRET_ACCESS_KEY else None}', S3_BUCKET_NAME='{settings.S3_BUCKET_NAME}', AWS_REGION='{settings.AWS_REGION}'"
+    )
     aws_key_set = bool(settings.AWS_ACCESS_KEY_ID)
     aws_secret_set = bool(settings.AWS_SECRET_ACCESS_KEY)
     bucket_set = bool(settings.S3_BUCKET_NAME)
-    logger.info(f"S3 check booleans: key={aws_key_set}, secret={aws_secret_set}, bucket={bucket_set}")
+    logger.info(
+        f"S3 check booleans: key={aws_key_set}, secret={aws_secret_set}, bucket={bucket_set}"
+    )
     if aws_key_set and aws_secret_set and bucket_set:
-        logger.info(f"S3 credentials configured, testing connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
+        logger.info(
+            f"S3 credentials configured, testing connection - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}"
+        )
         try:
             s3_client = boto3.client(
                 "s3",
@@ -215,36 +257,55 @@ async def health_check():
             try:
                 logger.info(f"Attempting head_bucket on {settings.S3_BUCKET_NAME}")
                 result = s3_client.head_bucket(Bucket=settings.S3_BUCKET_NAME)
-                logger.info(f"S3 head_bucket successful for bucket: {settings.S3_BUCKET_NAME}")
+                logger.info(
+                    f"S3 head_bucket successful for bucket: {settings.S3_BUCKET_NAME}"
+                )
                 s3_status = "healthy"
             except Exception as head_error:
                 error_str = str(head_error)
                 if "404" in error_str or "Not Found" in error_str:
-                    logger.error(f"S3 bucket '{settings.S3_BUCKET_NAME}' does not exist in region '{settings.AWS_REGION}'")
+                    logger.error(
+                        f"S3 bucket '{settings.S3_BUCKET_NAME}' does not exist in region '{settings.AWS_REGION}'"
+                    )
                     s3_status = "unhealthy"
                 elif "AccessDenied" in error_str or "Forbidden" in error_str:
-                    logger.error(f"S3 access denied to bucket '{settings.S3_BUCKET_NAME}' - check IAM permissions")
+                    logger.error(
+                        f"S3 access denied to bucket '{settings.S3_BUCKET_NAME}' - check IAM permissions"
+                    )
                     s3_status = "unhealthy"
                 else:
-                    logger.warning(f"S3 head_bucket failed with unexpected error: {head_error}, trying get_bucket_location")
+                    logger.warning(
+                        f"S3 head_bucket failed with unexpected error: {head_error}, trying get_bucket_location"
+                    )
                     try:
                         # Fallback: try to get bucket location to verify credentials work
                         logger.info("Attempting get_bucket_location")
-                        location = s3_client.get_bucket_location(Bucket=settings.S3_BUCKET_NAME)
-                        logger.info(f"S3 credentials work, bucket exists in region: {location.get('LocationConstraint', 'us-east-1')}")
+                        location = s3_client.get_bucket_location(
+                            Bucket=settings.S3_BUCKET_NAME
+                        )
+                        logger.info(
+                            f"S3 credentials work, bucket exists in region: {location.get('LocationConstraint', 'us-east-1')}"
+                        )
                         s3_status = "healthy"
                     except Exception as location_error:
-                        logger.error(f"S3 get_bucket_location also failed: {location_error}")
+                        logger.error(
+                            f"S3 get_bucket_location also failed: {location_error}"
+                        )
                         s3_status = "unhealthy"
         except Exception as e:
-            logger.error(f"S3 client creation/health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}")
+            logger.error(
+                f"S3 client creation/health check failed: {e} - Bucket: {settings.S3_BUCKET_NAME}, Region: {settings.AWS_REGION}"
+            )
             s3_status = "unhealthy"
     else:
         logger.info("S3 credentials not fully configured")
         s3_status = "not_configured"
 
     # Determine overall status
-    all_healthy = all(status in ["healthy", "not_configured"] for status in [db_status, redis_status, s3_status])
+    all_healthy = all(
+        status in ["healthy", "not_configured"]
+        for status in [db_status, redis_status, s3_status]
+    )
     overall_status = "healthy" if all_healthy else "unhealthy"
 
     return {
