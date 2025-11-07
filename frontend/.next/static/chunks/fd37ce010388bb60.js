@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,83150,e=>{"use strict";var t=e.i(9743),i=e.i(2909);function s(){return(0,t.jsx)("div",{className:"flex justify-center items-center h-screen",children:(0,t.jsx)(i.SignIn,{})})}e.s(["default",()=>s])}]);
