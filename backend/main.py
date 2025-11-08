@@ -135,8 +135,8 @@ app.state.limiter = limiter
 
 # CORS - Environment-aware configuration
 # Precedence:
-# 1. CORS_ALLOW_ORIGINS (comma-separated)
-# 2. ALLOWED_HOSTS (legacy, comma-separated)
+# 1. CORS_ALLOW_ORIGINS (comma-separated, from environment)
+# 2. ALLOWED_HOSTS (legacy, from environment or settings)
 # 3. Safe defaults in development; explicit-only in production.
 def _parse_csv_env(value: str | None) -> list[str]:
     if not value:
@@ -144,8 +144,17 @@ def _parse_csv_env(value: str | None) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-cors_from_env = _parse_csv_env(getattr(settings, "CORS_ALLOW_ORIGINS", None))
-hosts_from_env = _parse_csv_env(getattr(settings, "ALLOWED_HOSTS", None))
+# Read raw from environment to avoid surprises with settings parsing
+cors_from_env = _parse_csv_env(os.getenv("CORS_ALLOW_ORIGINS"))
+
+# Backwards compatibility / secondary source:
+# - Prefer raw ALLOWED_HOSTS env as CSV if present.
+# - Otherwise, fall back to Settings.ALLOWED_HOSTS (list[str]) if set.
+raw_allowed_hosts_env = os.getenv("ALLOWED_HOSTS")
+if raw_allowed_hosts_env:
+    hosts_from_env = _parse_csv_env(raw_allowed_hosts_env)
+else:
+    hosts_from_env = list(getattr(settings, "ALLOWED_HOSTS", []) or [])
 
 if cors_from_env:
     allowed_origins = cors_from_env
@@ -164,6 +173,11 @@ else:
             "http://127.0.0.1:8000",
         ]
 
+logger.info(
+    f"CORS_ALLOW_ORIGINS={os.getenv('CORS_ALLOW_ORIGINS')!r}, "
+    f"ALLOWED_HOSTS_ENV={raw_allowed_hosts_env!r}, "
+    f"settings.ALLOWED_HOSTS={getattr(settings, 'ALLOWED_HOSTS', None)!r}"
+)
 logger.info(f"CORS allowed_origins resolved to: {allowed_origins}")
 
 app.add_middleware(
