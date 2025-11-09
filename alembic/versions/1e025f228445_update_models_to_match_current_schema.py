@@ -26,10 +26,10 @@ def upgrade():
     )
     conversionmode_enum = sa.Enum("full", "summary_explanation", name="conversionmode")
 
-    producttype_enum.create(op.get_bind())
-    subscriptiontier_enum.create(op.get_bind())
-    voiceprovider_enum.create(op.get_bind())
-    conversionmode_enum.create(op.get_bind())
+    producttype_enum.create(op.get_bind(), if_not_exists=True)
+    subscriptiontier_enum.create(op.get_bind(), if_not_exists=True)
+    voiceprovider_enum.create(op.get_bind(), if_not_exists=True)
+    conversionmode_enum.create(op.get_bind(), if_not_exists=True)
 
     op.create_table(
         "products",
