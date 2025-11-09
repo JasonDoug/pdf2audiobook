@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x # Print commands
 
 echo "🚀 Starting PDF2Audiobook backend on Render..."
 
@@ -9,13 +10,7 @@ export PYTHONPATH="${PYTHONPATH}:backend"
 # Run database migrations on startup (only if DATABASE_URL is set)
 if [ -n "$DATABASE_URL" ]; then
     echo "🗄️ Running database migrations..."
-    if command -v uv &> /dev/null && uv run alembic upgrade head; then
-        echo "✅ Database migrations completed (uv)"
-    elif alembic upgrade head; then
-        echo "✅ Database migrations completed (pip)"
-    else
-        echo "⚠️ Database migrations failed, but continuing startup..."
-    fi
+    uv run alembic upgrade head
 else
     echo "⚠️ DATABASE_URL not set, skipping database migrations"
 fi
