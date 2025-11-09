@@ -52,8 +52,13 @@ def upgrade():
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("paddle_product_id"),
+        if_not_exists=True,
     )
-    op.create_index(op.f("ix_products_id"), "products", ["id"], unique=False)
+    try:
+        op.create_index(op.f("ix_products_id"), "products", ["id"], unique=False)
+    except Exception:
+        pass
+
     op.create_table(
         "subscriptions",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -80,8 +85,15 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("paddle_subscription_id"),
+        if_not_exists=True,
     )
-    op.create_index(op.f("ix_subscriptions_id"), "subscriptions", ["id"], unique=False)
+    try:
+        op.create_index(
+            op.f("ix_subscriptions_id"), "subscriptions", ["id"], unique=False
+        )
+    except Exception:
+        pass
+
     op.create_table(
         "transactions",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -108,32 +120,41 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("paddle_transaction_id"),
+        if_not_exists=True,
     )
     op.create_index(op.f("ix_transactions_id"), "transactions", ["id"], unique=False)
-    op.add_column(
+
+    # Idempotently add columns to jobs table
+    _idempotent_add_column(
         "jobs", sa.Column("original_filename", sa.String(length=255), nullable=False)
     )
-    op.add_column(
+    _idempotent_add_column(
         "jobs", sa.Column("pdf_s3_url", sa.String(length=1000), nullable=True)
     )
-    op.add_column(
+    _idempotent_add_column(
         "jobs", sa.Column("audio_s3_url", sa.String(length=1000), nullable=True)
     )
-    op.add_column("jobs", sa.Column("progress_percentage", sa.Integer(), nullable=True))
-    op.add_column("jobs", sa.Column("error_message", sa.Text(), nullable=True))
-    op.add_column(
+    _idempotent_add_column(
+        "jobs", sa.Column("progress_percentage", sa.Integer(), nullable=True)
+    )
+    _idempotent_add_column("jobs", sa.Column("error_message", sa.Text(), nullable=True))
+    _idempotent_add_column(
         "jobs", sa.Column("voice_provider", voiceprovider_enum, nullable=True)
     )
-    op.add_column("jobs", sa.Column("voice_type", sa.String(length=50), nullable=True))
-    op.add_column(
+    _idempotent_add_column(
+        "jobs", sa.Column("voice_type", sa.String(length=50), nullable=True)
+    )
+    _idempotent_add_column(
         "jobs",
         sa.Column("reading_speed", sa.Numeric(precision=3, scale=2), nullable=True),
     )
-    op.add_column("jobs", sa.Column("include_summary", sa.Boolean(), nullable=True))
-    op.add_column(
+    _idempotent_add_column(
+        "jobs", sa.Column("include_summary", sa.Boolean(), nullable=True)
+    )
+    _idempotent_add_column(
         "jobs", sa.Column("conversion_mode", conversionmode_enum, nullable=True)
     )
-    op.add_column(
+    _idempotent_add_column(
         "jobs",
         sa.Column(
             "created_at",
@@ -142,32 +163,39 @@ def upgrade():
             nullable=True,
         ),
     )
-    op.add_column(
+    _idempotent_add_column(
         "jobs", sa.Column("started_at", sa.DateTime(timezone=True), nullable=True)
     )
-    op.add_column(
+    _idempotent_add_column(
         "jobs", sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True)
     )
+
     op.alter_column("jobs", "user_id", existing_type=sa.INTEGER(), nullable=False)
     op.alter_column("jobs", "pdf_s3_key", existing_type=sa.VARCHAR(), nullable=False)
-    op.add_column(
+
+    # Idempotently add columns to users table
+    _idempotent_add_column(
         "users", sa.Column("auth_provider_id", sa.String(length=255), nullable=False)
     )
-    op.add_column(
+    _idempotent_add_column(
         "users", sa.Column("first_name", sa.String(length=100), nullable=True)
     )
-    op.add_column("users", sa.Column("last_name", sa.String(length=100), nullable=True))
-    op.add_column(
+    _idempotent_add_column(
+        "users", sa.Column("last_name", sa.String(length=100), nullable=True)
+    )
+    _idempotent_add_column(
         "users", sa.Column("subscription_tier", subscriptiontier_enum, nullable=True)
     )
-    op.add_column(
+    _idempotent_add_column(
         "users", sa.Column("paddle_customer_id", sa.String(length=255), nullable=True)
     )
-    op.add_column("users", sa.Column("one_time_credits", sa.Integer(), nullable=True))
-    op.add_column(
+    _idempotent_add_column(
+        "users", sa.Column("one_time_credits", sa.Integer(), nullable=True)
+    )
+    _idempotent_add_column(
         "users", sa.Column("monthly_credits_used", sa.Integer(), nullable=True)
     )
-    op.add_column(
+    _idempotent_add_column(
         "users",
         sa.Column(
             "created_at",
@@ -176,15 +204,41 @@ def upgrade():
             nullable=True,
         ),
     )
-    op.add_column(
+    _idempotent_add_column(
         "users", sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True)
     )
-    op.create_index(
-        op.f("ix_users_auth_provider_id"), "users", ["auth_provider_id"], unique=True
-    )
-    op.drop_column("users", "hashed_password")
-    op.drop_column("users", "is_active")
+
+    try:
+        op.create_index(
+            op.f("ix_users_auth_provider_id"),
+            "users",
+            ["auth_provider_id"],
+            unique=True,
+        )
+    except Exception:
+        # Index probably already exists
+        pass
+
+    try:
+        op.drop_column("users", "hashed_password")
+        op.drop_column("users", "is_active")
+    except Exception:
+        # Columns probably don't exist
+        pass
     # ### end Alembic commands ###
+
+
+def _idempotent_add_column(table_name, column):
+    from sqlalchemy.exc import InternalError
+
+    try:
+        op.add_column(table_name, column)
+    except InternalError as e:
+        # Error code for "duplicate column" in PostgreSQL is 42701
+        if "duplicate column" in str(e) or "column already exists" in str(e).lower():
+            print(f"Column {column.name} already exists on {table_name}, skipping.")
+        else:
+            raise
 
 
 def downgrade():
