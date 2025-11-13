@@ -3,6 +3,9 @@ set -e
 set -x # Print commands
 
 echo "🚀 Starting PDF2Audiobook backend on Render..."
+echo "--- render-start.sh content ---"
+cat ./render-start.sh
+echo "--- end render-start.sh content ---"
 
 # Set PYTHONPATH to include backend directory
 export PYTHONPATH="${PYTHONPATH}:backend"
@@ -12,11 +15,11 @@ if [ -n "$DATABASE_URL" ]; then
     echo "🗄️ Running database migrations one by one..."
 
     echo "➡️ Running initial migration: 20231115"
-    uv run alembic -vv upgrade 20231115
+    uv run alembic upgrade 20231115
     echo "✅ Initial migration complete."
 
     echo "➡️ Running second migration: 1e025f228445"
-    uv run alembic -vv upgrade 1e025f228445
+    uv run alembic upgrade 1e025f228445
     echo "✅ Second migration complete."
 
     echo "✅ All migrations completed successfully."
