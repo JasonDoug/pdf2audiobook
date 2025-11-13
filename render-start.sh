@@ -9,8 +9,17 @@ export PYTHONPATH="${PYTHONPATH}:backend"
 
 # Run database migrations on startup (only if DATABASE_URL is set)
 if [ -n "$DATABASE_URL" ]; then
-    echo "🗄️ Running database migrations..."
-    uv run alembic upgrade head
+    echo "🗄️ Running database migrations one by one..."
+
+    echo "➡️ Running initial migration: 20231115"
+    uv run alembic upgrade 20231115
+    echo "✅ Initial migration complete."
+
+    echo "➡️ Running second migration: 1e025f228445"
+    uv run alembic upgrade 1e025f228445
+    echo "✅ Second migration complete."
+
+    echo "✅ All migrations completed successfully."
 else
     echo "⚠️ DATABASE_URL not set, skipping database migrations"
 fi

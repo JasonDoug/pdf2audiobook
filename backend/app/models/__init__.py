@@ -1,18 +1,19 @@
+import enum
+
 from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Text,
     Boolean,
-    ForeignKey,
+    Column,
+    DateTime,
     Enum,
+    ForeignKey,
+    Integer,
     Numeric,
+    String,
+    Text,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
 
 Base = declarative_base()
 
@@ -58,7 +59,7 @@ class User(Base):
     last_name = Column(String(100))
 
     # Subscription info
-    subscription_tier = Column(Enum(SubscriptionTier, values_callable=lambda x: [e.value for e in x]), default=SubscriptionTier.FREE)
+    subscription_tier = Column(Enum(SubscriptionTier), default=SubscriptionTier.FREE)
     paddle_customer_id = Column(String(255))
     one_time_credits = Column(Integer, default=0)
     monthly_credits_used = Column(Integer, default=0)
@@ -86,16 +87,16 @@ class Job(Base):
     audio_s3_url = Column(String(1000))
 
     # Processing info
-    status = Column(Enum(JobStatus, values_callable=lambda x: [e.value for e in x]), default=JobStatus.PENDING)
+    status = Column(Enum(JobStatus), default=JobStatus.PENDING)
     progress_percentage = Column(Integer, default=0)
     error_message = Column(Text)
 
     # Processing options
-    voice_provider = Column(Enum(VoiceProvider, values_callable=lambda x: [e.value for e in x]), default=VoiceProvider.OPENAI)
+    voice_provider = Column(Enum(VoiceProvider), default=VoiceProvider.OPENAI)
     voice_type = Column(String(50), default="default")
     reading_speed = Column(Numeric(3, 2), default=1.0)
     include_summary = Column(Boolean, default=False)
-    conversion_mode = Column(Enum(ConversionMode, values_callable=lambda x: [e.value for e in x]), default=ConversionMode.FULL)
+    conversion_mode = Column(Enum(ConversionMode), default=ConversionMode.FULL)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -113,7 +114,7 @@ class Product(Base):
     paddle_product_id = Column(String(255), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text)
-    type = Column(Enum(ProductType, values_callable=lambda x: [e.value for e in x]), nullable=False)
+    type = Column(Enum(ProductType), nullable=False)
 
     # Pricing
     price = Column(Numeric(10, 2))
@@ -121,7 +122,7 @@ class Product(Base):
 
     # Credits/Tier info
     credits_included = Column(Integer)
-    subscription_tier = Column(Enum(SubscriptionTier, values_callable=lambda x: [e.value for e in x]))
+        subscription_tier = Column(Enum(SubscriptionTier))
 
     # Status
     is_active = Column(Boolean, default=True)
