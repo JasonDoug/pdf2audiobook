@@ -15,13 +15,46 @@ echo "DATABASE_URL is set, proceeding with migrations..."
 echo "Working directory: $(pwd)"
 echo "DATABASE_URL: ${DATABASE_URL:0:20}..."
 
+# Check if we need to run schema updates even if tables exist
+echo "Checking if database schema needs updates..."
+schema_needs_update=false
+
+# Check if auth_provider_id column exists
+auth_provider_id_exists=$(PGPASSWORD=$DB_PASSWORD psql "$DATABASE_URL" -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='auth_provider_id';" 2>/dev/null | xargs)
+
+if [ "$auth_provider_id_exists" != "auth_provider_id" ]; then
+    echo "Schema update needed: auth_provider_id column missing"
+    schema_needs_update=true
+fi
+
 # Check if tables already exist by checking for the 'users' table
 echo "Checking if database tables already exist..."
 table_exists=$(PGPASSWORD=$DB_PASSWORD psql "$DATABASE_URL" -t -c "SELECT to_regclass('users');" 2>/dev/null | xargs)
 
-if [ "$table_exists" = "users" ]; then
-    echo "Database tables already exist, skipping migrations..."
+if [ "$table_exists" = "users" ] && [ "$schema_needs_update" = "false" ]; then
+    echo "Database tables already exist with correct schema, skipping migrations..."
     echo "This is normal for subsequent deployments."
+elif [ "$table_exists" = "users" ] && [ "$schema_needs_update" = "true" ]; then
+    echo "Database tables exist but schema needs updates..."
+    echo "Running schema migrations to add missing columns..."
+
+    # Set alembic configuration
+    export ALEMBIC_CONFIG=alembic.ini
+
+    # Check if alembic.ini exists
+    if [ ! -f "alembic.ini" ]; then
+        echo "ERROR: alembic.ini not found in $(pwd)"
+        ls -la
+        exit 1
+    fi
+
+    # Run migrations to update schema
+    if alembic upgrade head; then
+        echo "Database schema updates completed successfully"
+    else
+        echo "Schema migration failed, but continuing with application startup..."
+        echo "This might cause functionality issues if columns are missing"
+    fi
 else
     echo "Running database migrations for first-time setup..."
 
