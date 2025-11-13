@@ -122,7 +122,7 @@ class Product(Base):
 
     # Credits/Tier info
     credits_included = Column(Integer)
-        subscription_tier = Column(Enum(SubscriptionTier))
+    subscription_tier = Column(Enum(SubscriptionTier))
 
     # Status
     is_active = Column(Boolean, default=True)
