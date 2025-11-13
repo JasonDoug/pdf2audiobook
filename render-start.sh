@@ -1,4 +1,4 @@
 #!/bin/bash
 export PYTHONPATH="${PYTHONPATH}:backend"
-uv run alembic upgrade 1e025f228445
+alembic upgrade 1e025f228445
 exec uv run uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 4
