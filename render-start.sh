@@ -48,12 +48,60 @@ elif [ "$table_exists" = "users" ] && [ "$schema_needs_update" = "true" ]; then
         exit 1
     fi
 
-    # Run migrations to update schema
+    # Try running migrations first
     if alembic upgrade head; then
         echo "Database schema updates completed successfully"
     else
-        echo "Schema migration failed, but continuing with application startup..."
-        echo "This might cause functionality issues if columns are missing"
+        echo "Alembic migration failed, trying manual schema update..."
+
+        # Manually add missing columns if they don't exist
+        echo "Adding missing columns manually..."
+        PGPASSWORD=$DB_PASSWORD psql "$DATABASE_URL" << 'EOF'
+-- Add missing columns to users table if they don't exist
+ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier subscriptiontier DEFAULT 'free';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS paddle_customer_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS one_time_credits INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS monthly_credits_used INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE;
+
+-- Add missing columns to jobs table if they don't exist
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS original_filename VARCHAR(255);
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS pdf_s3_url VARCHAR(1000);
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS audio_s3_url VARCHAR(1000);
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS progress_percentage INTEGER;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS error_message TEXT;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS voice_provider voiceprovider DEFAULT 'openai';
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS voice_type VARCHAR(50) DEFAULT 'default';
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS reading_speed NUMERIC(3,2) DEFAULT 1.0;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS include_summary BOOLEAN DEFAULT FALSE;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS conversion_mode conversionmode DEFAULT 'full';
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS started_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP WITH TIME ZONE;
+
+-- Add missing columns to products table if they don't exist
+ALTER TABLE products ADD COLUMN IF NOT EXISTS type producttype;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS credits_included INTEGER;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS subscription_tier subscriptiontier;
+
+-- Add missing columns to subscriptions table if they don't exist
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS paddle_subscription_id VARCHAR(255);
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP WITH TIME ZONE;
+
+-- Add missing columns to transactions table if they don't exist
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS credits_added INTEGER;
+
+-- Create indexes if they don't exist
+CREATE INDEX IF NOT EXISTS idx_users_auth_provider_id ON users(auth_provider_id);
+EOF
+
+        if [ $? -eq 0 ]; then
+            echo "Manual schema update completed successfully"
+        else
+            echo "Manual schema update failed - this will cause functionality issues"
+            echo "You may need to manually run the SQL commands in your database"
+        fi
     fi
 else
     echo "Running database migrations for first-time setup..."
