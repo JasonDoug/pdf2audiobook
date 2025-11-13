@@ -1,4 +1,5 @@
 import enum
+import os
 
 from sqlalchemy import (
     Boolean,
@@ -16,6 +17,17 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 Base = declarative_base()
+
+
+# Production-safe ENUM creation
+def create_enum_type(name, values, metadata):
+    """Create ENUM type safely for production environments"""
+    if os.getenv("ENVIRONMENT") == "production":
+        # In production, assume ENUM types already exist (created via migrations)
+        return Enum(name, create_type=False)
+    else:
+        # In development, create ENUM types automatically
+        return Enum(name, values, create_type=True)
 
 
 class SubscriptionTier(enum.Enum):
@@ -59,7 +71,10 @@ class User(Base):
     last_name = Column(String(100))
 
     # Subscription info
-    subscription_tier = Column(Enum(SubscriptionTier), default=SubscriptionTier.FREE)
+    subscription_tier = Column(
+        create_enum_type("subscriptiontier", SubscriptionTier, Base.metadata),
+        default=SubscriptionTier.FREE,
+    )
     paddle_customer_id = Column(String(255))
     one_time_credits = Column(Integer, default=0)
     monthly_credits_used = Column(Integer, default=0)
@@ -92,11 +107,17 @@ class Job(Base):
     error_message = Column(Text)
 
     # Processing options
-    voice_provider = Column(Enum(VoiceProvider), default=VoiceProvider.OPENAI)
+    voice_provider = Column(
+        create_enum_type("voiceprovider", VoiceProvider, Base.metadata),
+        default=VoiceProvider.OPENAI,
+    )
     voice_type = Column(String(50), default="default")
     reading_speed = Column(Numeric(3, 2), default=1.0)
     include_summary = Column(Boolean, default=False)
-    conversion_mode = Column(Enum(ConversionMode), default=ConversionMode.FULL)
+    conversion_mode = Column(
+        create_enum_type("conversionmode", ConversionMode, Base.metadata),
+        default=ConversionMode.FULL,
+    )
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -126,6 +147,10 @@ class Product(Base):
 
     # Status
     is_active = Column(Boolean, default=True)
+    # Processing type with safe ENUM handling
+    type = Column(
+        create_enum_type("producttype", ProductType, Base.metadata), nullable=False
+    )
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

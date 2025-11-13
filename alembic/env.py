@@ -4,7 +4,8 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import Column, Integer, MetaData, Table, engine_from_config, pool
+from sqlalchemy.dialects import postgresql
 
 from alembic import context
 
@@ -29,6 +30,36 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
 from app.models import Base
 
 target_metadata = Base.metadata
+
+
+# Custom function to handle ENUM types more gracefully
+def check_and_create_enums(connection):
+    """Check if ENUM types exist and create them if they don't"""
+    enum_types = {
+        "producttype": ["subscription", "one_time"],
+        "subscriptiontier": ["free", "pro", "enterprise"],
+        "voiceprovider": ["openai", "google", "aws_polly", "azure", "eleven_labs"],
+        "conversionmode": ["full", "summary_explanation"],
+        "jobstatus": ["pending", "processing", "completed", "failed"],
+    }
+
+    for enum_name, enum_values in enum_types.items():
+        try:
+            # Check if enum exists
+            result = connection.execute(
+                "SELECT 1 FROM pg_type WHERE typname = %s", (enum_name,)
+            ).fetchone()
+
+            if not result:
+                # Create enum type
+                values_str = "', '".join(enum_values)
+                connection.execute(f"CREATE TYPE {enum_name} AS ENUM ('{values_str}')")
+                print(f"Created ENUM type: {enum_name}")
+        except Exception as e:
+            print(f"Error handling enum {enum_name}: {e}")
+            # Continue even if enum creation fails
+            pass
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:-
@@ -69,6 +100,9 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
+        # Check and create ENUM types before running migrations
+        check_and_create_enums(connection)
+
         context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
